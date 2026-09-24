@@ -1,4 +1,4 @@
-# LiigaWatch — Privacy Policy
+# FILiigaWatch — Privacy Policy
 
 _Effective 2026-09-24. Contact: iot@tallimedia.com_
 

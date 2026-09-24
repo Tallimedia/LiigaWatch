@@ -2,11 +2,11 @@ import Toybox.Application;
 import Toybox.Lang;
 import Toybox.WatchUi;
 
-//! LiigaWatch — Liiga (SM-liiga) scores and standings, backed by
+//! FILiigaWatch — Liiga (SM-liiga) scores and standings, backed by
 //! liigawatch.tallimedia.com (Api.mc). MockData.mc's fixtures remain as a
 //! dev-only fallback source, switchable from the action menu, but
 //! production reads live from the backend by default.
-class LiigaWatchApp extends Application.AppBase {
+class FILiigaWatchApp extends Application.AppBase {
 
     function initialize() {
         AppBase.initialize();

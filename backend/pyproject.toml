@@ -1,7 +1,7 @@
 [project]
 name = "liigawatch-backend"
 version = "0.1.0"
-description = "Backend proxy serving liiga.fi data to the LiigaWatch Garmin app"
+description = "Backend proxy serving liiga.fi data to the FILiigaWatch Garmin app"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",

@@ -1,4 +1,4 @@
-"""LiigaWatch backend.
+"""FILiigaWatch backend.
 
 Serves reshaped liiga.fi data to the Garmin watch app. Every response is kept
 small deliberately: Connect IQ starts failing somewhere around 32 kB
@@ -37,7 +37,7 @@ async def _lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     lifespan=_lifespan,
-    title="LiigaWatch backend",
+    title="FILiigaWatch backend",
     version="0.1.0",
     description="liiga.fi data, reshaped for a Garmin watch. Unofficial — "
     "not affiliated with Jääkiekon SM-liiga Oy. Data: Liiga.fi.",
@@ -128,7 +128,7 @@ def _legal_page(name: str) -> HTMLResponse:
         f"em{{color:#6b6e70}}li{{margin:4px 0}}"
         f".back{{display:inline-block;margin-bottom:28px;color:#416180;"
         f"text-decoration:none;font-size:14px}}</style></head><body>"
-        f"<a class=\"back\" href=\"/\">&larr; LiigaWatch</a>{body}</body></html>",
+        f"<a class=\"back\" href=\"/\">&larr; FILiigaWatch</a>{body}</body></html>",
         headers={"Cache-Control": "no-cache, must-revalidate"},
     )
 

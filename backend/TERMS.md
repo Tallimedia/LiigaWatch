@@ -1,8 +1,8 @@
-# LiigaWatch — Terms of Service
+# FILiigaWatch — Terms of Service
 
 _Effective 2026-09-24. Contact: iot@tallimedia.com_
 
-LiigaWatch ("the app") is a personal, non-commercial project that shows
+FILiigaWatch ("the app") is a personal, non-commercial project that shows
 Liiga (SM-liiga) ice hockey scores and standings on a Garmin watch. It is
 **not affiliated with, endorsed by, or supported by Jääkiekon SM-liiga Oy**
 ("Liiga") or any club. All club names and marks belong to their owners.

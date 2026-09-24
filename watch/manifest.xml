@@ -18,7 +18,7 @@
         id="3be2f502eeff40c7b0e859bfbb271279"
         type="widget"
         name="@Strings.AppName"
-        entry="LiigaWatchApp"
+        entry="FILiigaWatchApp"
         version="0.1.0"
         launcherIcon="@Drawables.LauncherIcon"
         minApiLevel="3.4.0">

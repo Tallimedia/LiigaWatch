@@ -1,6 +1,6 @@
-# LiigaWatch — backend
+# FILiigaWatch — backend
 
-Serves liiga.fi's public API, reshaped for the LiigaWatch Garmin watch app.
+Serves liiga.fi's public API, reshaped for the FILiigaWatch Garmin watch app.
 Unofficial — not affiliated with Jääkiekon SM-liiga Oy.
 
 Planning and research live in `RESEARCH.md`, which is owned by the

@@ -13,7 +13,7 @@ import Toybox.WatchUi;
 //! No Application.Storage persistence here, unlike FIWeatherWatch's Api.mc —
 //! deliberate scope cut, not an oversight. That backend persists readings
 //! because a marine app's phone is routinely out of BLE range for hours;
-//! LiigaWatch has no equivalent case where stale scores from a previous
+//! FILiigaWatch has no equivalent case where stale scores from a previous
 //! session are worth showing over a clean "loading"/"unavailable" state on
 //! a fresh launch. Revisit if that assumption turns out wrong in practice.
 module Api {
