@@ -89,6 +89,33 @@ module MockData {
         ];
     }
 
+    //! Fixture for `nextGameDate`'s actual fixtures — added 2026-09-24
+    //! (Nico: "Next games needs the data of the next games"). Before this,
+    //! the no-games-today state showed only a bare date with no matchups,
+    //! which isn't what the real `/v1/games` response for that date would
+    //! give you — the real backend's nextGameDate point is a full day of
+    //! games, same shape as today's, just not started yet.
+    function nextGames() as Array<Dictionary> {
+        return [
+            { :home => "Ilves", :away => "JYP", :homeGoals => 0, :awayGoals => 0,
+              :started => false, :ended => false, :finishedType => "ACTIVE_OR_NOT_STARTED",
+              :period => 0, :gameTime => 0, :startTime => "18:30" },
+            { :home => "KooKoo", :away => "HPK", :homeGoals => 0, :awayGoals => 0,
+              :started => false, :ended => false, :finishedType => "ACTIVE_OR_NOT_STARTED",
+              :period => 0, :gameTime => 0, :startTime => "18:30" },
+        ];
+    }
+
+    //! What the Today screen should actually render: today's games, or —
+    //! when there are none — the next game day's fixtures instead, so
+    //! "Next games" is never just a bare date. Both Pages.mc and
+    //! PageView.mc's scroll-boundary check read this, not todayGames()
+    //! directly, so they can't disagree about which list is on screen.
+    function displayGames() as Array<Dictionary> {
+        var today = todayGames();
+        return (today.size() > 0) ? today : nextGames();
+    }
+
     function standings() as Array<Dictionary> {
         return [
             { :rank => 1, :name => "JYP", :games => 5, :points => 15, :goalDiff => 12 },

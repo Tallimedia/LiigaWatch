@@ -31,22 +31,16 @@ module Pages {
     //! unscrolled first screen without needing its own pin like Table's.
     function drawToday(dc as Graphics.Dc, scrollOffset as Number) as Number {
         var cx = w(dc) / 2;
-        var games = orderFavoriteFirst(MockData.todayGames());
+        var isToday = MockData.todayGames().size() > 0;
+        var games = orderFavoriteFirst(MockData.displayGames());
 
-        var headerText;
-        if (games.size() == 0) {
-            headerText = Lang.format(res(Rez.Strings.TodayHeaderNext), []);
-            // No games today — header alone, then the next scheduled date.
-            dc.setColor(Theme.DIM, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, (h(dc) * 0.10).toNumber(), Graphics.FONT_SMALL, headerText,
-                        Graphics.TEXT_JUSTIFY_CENTER);
-            dc.setColor(Theme.INK, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, (h(dc) * 0.30).toNumber(), Graphics.FONT_MEDIUM,
-                        MockData.NEXT_GAME_DATE, Graphics.TEXT_JUSTIFY_CENTER);
-            return 0;
-        }
-
-        headerText = Lang.format(res(Rez.Strings.TodayHeaderGames), [todayDate()]);
+        // "Next games" still needs the actual date, and still uses real
+        // rows below — 2026-09-24 fix: this used to be a bare date with no
+        // matchups at all, which isn't what the real backend's
+        // nextGameDate response would ever look like.
+        var headerText = isToday
+            ? Lang.format(res(Rez.Strings.TodayHeaderGames), [todayDate()])
+            : Lang.format("$1$ $2$", [res(Rez.Strings.TodayHeaderNext), MockData.NEXT_GAME_DATE]);
         // Range indicator only once scrolled, same convention as Table.
         if (scrollOffset > 0) {
             headerText = Lang.format("$1$ $2$–$3$", [headerText, scrollOffset + 1,

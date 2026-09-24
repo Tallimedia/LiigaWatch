@@ -34,7 +34,7 @@ class PageView extends WatchUi.View {
     function next() as Void {
         if (_page == TODAY_PAGE) {
             var nextOffset = _todayScroll + _todayRowsShown;
-            if (nextOffset < MockData.todayGames().size()) {
+            if (nextOffset < MockData.displayGames().size()) {
                 _todayScroll = nextOffset;
                 WatchUi.requestUpdate();
                 return;
