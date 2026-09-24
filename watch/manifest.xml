@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
 <!--
     Sim-only first beta, 2026-09-24. Device list here is deliberately a small
-    spread for layout sanity-checking (fenix847mm as the usual dev target,
-    plus a smaller round, an AMOLED round, and an Instinct-style MIP square)
-    — NOT the final manifest. RESEARCH.md §6 defers the real device list to a
-    Phase 2 task against Garmin's live compatible-devices page; don't treat
-    this four-device list as that decision.
+    spread for layout sanity-checking — NOT the final manifest. RESEARCH.md
+    §6 defers the real device list to a Phase 2 task against Garmin's live
+    compatible-devices page; don't treat this list as that decision.
+
+    instinct2 deliberately left out of this build (Nico, 2026-09-24): its
+    Theme.LIVE/Theme.FAVORITE accent colours render invisible on its true
+    2-colour palette (RESEARCH.md Open Question 8, diagnosed but not yet
+    fixed). Add it back once that's addressed rather than shipping/testing
+    a device with a known content-invisible bug.
 
     App id generated fresh with: uuidgen | tr -d - | tr 'A-Z' 'a-z'
 -->
@@ -24,7 +28,6 @@
         <iq:product id="fenix7s"/>
         <iq:product id="venu3s"/>
         <iq:product id="venu3"/>
-        <iq:product id="instinct2"/>
         <iq:product id="fr265"/>
         <iq:product id="fr255s"/>
         </iq:products>
