@@ -17,6 +17,22 @@ module Pages {
     function w(dc as Graphics.Dc) as Number { return dc.getWidth(); }
     function h(dc as Graphics.Dc) as Number { return dc.getHeight(); }
 
+    //! Draws `full` centred at (cx, y), or `compact` instead if `full`
+    //! measures wider than the screen actually has — found 2026-09-24 on
+    //! Instinct 2 (176x176px vs. fenix847mm's 454x454): Garmin's system
+    //! fonts are roughly the same absolute pixel size on every device, so
+    //! a scrolled-range header ("Games today 24.9. 3-3") that fits fine at
+    //! 454px genuinely doesn't fit at 176px. No percentage-of-screen
+    //! margin can fix that — only measuring the real text width can, via
+    //! getTextWidthInPixels, which is the whole reason this exists rather
+    //! than more margin tuning.
+    function drawFittingHeader(dc as Graphics.Dc, cx as Number, y as Number,
+                                full as String, compact as String) as Void {
+        var text = (dc.getTextWidthInPixels(full, Graphics.FONT_XTINY) > w(dc) * 0.92)
+            ? compact : full;
+        dc.drawText(cx, y, Graphics.FONT_XTINY, text, Graphics.TEXT_JUSTIFY_CENTER);
+    }
+
     // ---------------------------------------------------------------
     // Today
     // ---------------------------------------------------------------
@@ -41,14 +57,20 @@ module Pages {
         var headerText = isToday
             ? Lang.format(res(Rez.Strings.TodayHeaderGames), [todayDate()])
             : Lang.format("$1$ $2$", [res(Rez.Strings.TodayHeaderNext), MockData.NEXT_GAME_DATE]);
+        var compactHeader = headerText;
         // Range indicator only once scrolled, same convention as Table.
+        // Compact fallback is the range alone — on a screen too narrow for
+        // the full sentence, the range is still legible on its own; the
+        // unscrolled first screen (no range) already said what day it is.
         if (scrollOffset > 0) {
-            headerText = Lang.format("$1$ $2$–$3$", [headerText, scrollOffset + 1,
+            var rangeText = Lang.format("$1$–$2$", [scrollOffset + 1,
                 (scrollOffset + 3 < games.size()) ? scrollOffset + 3 : games.size()]);
+            headerText = Lang.format("$1$ $2$", [headerText, rangeText]);
+            compactHeader = rangeText;
         }
         dc.setColor(Theme.DIM, Graphics.COLOR_TRANSPARENT);
         var headerY = (h(dc) * 0.08).toNumber();
-        dc.drawText(cx, headerY, Graphics.FONT_XTINY, headerText, Graphics.TEXT_JUSTIFY_CENTER);
+        drawFittingHeader(dc, cx, headerY, headerText, compactHeader);
 
         // Stack rows by real font metrics, not a blind fraction of screen
         // height — that was the bug behind the first sim screenshot
@@ -180,11 +202,14 @@ module Pages {
         // Range indicator only once scrolled — scrollOffset 0 stays a plain
         // "Table" title, matching the original quick-glance view exactly.
         var title = res(Rez.Strings.PageTable);
+        var compactTitle = title;
         if (scrollOffset > 0) {
-            title = Lang.format("$1$ $2$–$3$", [title, scrollOffset + 1,
+            var rangeText = Lang.format("$1$–$2$", [scrollOffset + 1,
                 (scrollOffset + 7 < rows.size()) ? scrollOffset + 7 : rows.size()]);
+            title = Lang.format("$1$ $2$", [title, rangeText]);
+            compactTitle = rangeText;
         }
-        dc.drawText(cx, headerY, Graphics.FONT_XTINY, title, Graphics.TEXT_JUSTIFY_CENTER);
+        drawFittingHeader(dc, cx, headerY, title, compactTitle);
 
         var rowH = dc.getFontHeight(Graphics.FONT_XTINY) + (h(dc) * 0.015).toNumber();
         var top = headerY + (h(dc) * 0.10).toNumber();
