@@ -46,4 +46,16 @@ class PageDelegate extends WatchUi.BehaviorDelegate {
         WatchUi.pushView(AppMenu.buildMenu(), new MenuDelegate(), WatchUi.SLIDE_UP);
         return true;
     }
+
+    //! Select as a second way into the action menu — onMenu()'s long-press
+    //! gesture depends on a per-device key mapping that isn't reliably
+    //! reachable in the simulator (Nico, 2026-09-24). Select is always a
+    //! clickable on-screen control in the sim, so this guarantees access
+    //! regardless of device skin. Once there's a real "refresh now" action
+    //! (once the backend exists), reconsider whether Select should do that
+    //! instead and move the menu back to onMenu-only.
+    function onSelect() as Boolean {
+        WatchUi.pushView(AppMenu.buildMenu(), new MenuDelegate(), WatchUi.SLIDE_UP);
+        return true;
+    }
 }

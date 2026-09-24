@@ -146,9 +146,14 @@ module Pages {
         var rows = MockData.standings();
         var rowH = dc.getFontHeight(Graphics.FONT_XTINY) + (h(dc) * 0.015).toNumber();
         var top = headerY + (h(dc) * 0.10).toNumber();
-        var bottomLimit = (h(dc) * 0.88).toNumber();
-        var leftX = (w(dc) * 0.12).toNumber();
-        var rightX = (w(dc) * 0.88).toNumber();
+        // Bottom limit and side margins pulled in further than a naive
+        // proportional layout would need, because the round bezel narrows
+        // the usable width as rows approach the bottom edge — the last
+        // (often pinned-favourite) row was clipping left and right in the
+        // sim screenshots (2026-09-24) at the previous 0.88/0.12 values.
+        var bottomLimit = (h(dc) * 0.84).toNumber();
+        var leftX = (w(dc) * 0.17).toNumber();
+        var rightX = (w(dc) * 0.83).toNumber();
 
         var fav = AppMenu.favoriteTeam();
         var favoriteIdx = -1;
