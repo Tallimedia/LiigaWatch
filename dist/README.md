@@ -1,0 +1,23 @@
+# Releases
+
+**Everything shippable lives here.** Not the Desktop, not a temp folder — one
+place, so there is never a question of which file is current.
+
+| File | What |
+|---|---|
+| `FILiigaWatch-v0.1.0.iq` | the store upload — 8 device targets from the 6 in `watch/manifest.xml` (compound devices expand automatically), not yet uploaded anywhere |
+
+Device list is deliberately a small spread for layout sanity-checking
+(RESEARCH.md §6), not the final device manifest — expanding it is separate,
+later work. `instinct2` is excluded (RESEARCH.md Open Question 8: a real,
+diagnosed but unfixed rendering bug on its 2-colour palette).
+
+No per-device settings here, unlike FIWeatherWatch — the app has no
+compiled-in defaults to edit per tester (favourite team and cadence are both
+picked on-device, nothing ships pre-set).
+
+## Screenshots
+
+`../Screenshots/` — raw simulator captures and their bezel-framed versions
+(`Screenshots/frame.py`, copied from FIWeatherWatch's), both under the
+store's 300 kB limit.
