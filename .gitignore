@@ -11,3 +11,19 @@ watch/bin/
 *.prg
 *.prg.debug.xml
 *.iq
+
+# Python (backend)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local config / secrets
+.env
+.env.*
+!.env.example
+data/
