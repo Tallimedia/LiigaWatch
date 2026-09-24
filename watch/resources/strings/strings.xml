@@ -1,0 +1,28 @@
+<strings>
+    <string id="AppName">LiigaWatch</string>
+
+    <!-- Today screen -->
+    <string id="TodayHeaderGames">Games today $1$</string>
+    <string id="TodayHeaderNext">Next games</string>
+
+    <!-- Table screen -->
+    <string id="PageTable">Table</string>
+
+    <!-- About screen -->
+    <string id="PageAbout">About</string>
+    <string id="Attribution">Source: Liiga.fi</string>
+    <string id="DisclaimerL1">Unofficial app —</string>
+    <string id="DisclaimerL2">not affiliated with Liiga</string>
+
+    <!-- Cadence action menu -->
+    <string id="MenuCadence">Update frequency</string>
+    <string id="CadenceGameDaysOnly">Only available on game days</string>
+    <string id="Cadence5s">5 seconds</string>
+    <string id="Cadence15s">15 seconds</string>
+    <string id="Cadence30s">30 seconds</string>
+    <string id="Cadence60s">60 seconds</string>
+
+    <!-- Status -->
+    <string id="Loading">Loading…</string>
+    <string id="NoData">Service unavailable</string>
+</strings>

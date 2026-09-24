@@ -1,0 +1,23 @@
+<strings>
+    <string id="AppName">LiigaWatch</string>
+
+    <string id="TodayHeaderGames">Matcher idag $1$</string>
+    <string id="TodayHeaderNext">Nästa matcher</string>
+
+    <string id="PageTable">Tabell</string>
+
+    <string id="PageAbout">Om</string>
+    <string id="Attribution">Källa: Liiga.fi</string>
+    <string id="DisclaimerL1">Inofficiell app —</string>
+    <string id="DisclaimerL2">inte kopplad till Liiga</string>
+
+    <string id="MenuCadence">Uppdateringsfrekvens</string>
+    <string id="CadenceGameDaysOnly">Endast tillgänglig på matchdagar</string>
+    <string id="Cadence5s">5 sekunder</string>
+    <string id="Cadence15s">15 sekunder</string>
+    <string id="Cadence30s">30 sekunder</string>
+    <string id="Cadence60s">60 sekunder</string>
+
+    <string id="Loading">Laddar…</string>
+    <string id="NoData">Tjänsten är inte tillgänglig</string>
+</strings>

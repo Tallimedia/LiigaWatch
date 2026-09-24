@@ -1,0 +1,13 @@
+# Owned by claude-docs, not this repo — see claude-docs/CLAUDE.md
+# ("Nested project code repos")
+RESEARCH.md
+LOGO-PERMISSION-REQUEST.md
+
+# OS
+.DS_Store
+
+# Connect IQ build output
+watch/bin/
+*.prg
+*.prg.debug.xml
+*.iq
