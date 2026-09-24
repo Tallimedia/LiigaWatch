@@ -1,12 +1,11 @@
 import Toybox.Application;
-import Toybox.Application.Storage;
 import Toybox.Lang;
 import Toybox.WatchUi;
 
-//! Sim-only first beta (2026-09-24) — runs entirely on MockData, no backend
-//! yet. RESEARCH.md §9 lays out the real Phase 1/2 split; this exists to
-//! validate layout, navigation and the three Today-screen states before the
-//! backend is built.
+//! LiigaWatch — Liiga (SM-liiga) scores and standings, backed by
+//! liigawatch.tallimedia.com (Api.mc). MockData.mc's fixtures remain as a
+//! dev-only fallback source, switchable from the action menu, but
+//! production reads live from the backend by default.
 class LiigaWatchApp extends Application.AppBase {
 
     function initialize() {
@@ -14,12 +13,7 @@ class LiigaWatchApp extends Application.AppBase {
     }
 
     function onStart(state as Dictionary?) as Void {
-        // Sim-beta convenience only, remove before backend integration:
-        // defaults the favourite-team picker to HIFK so the highlight is
-        // visible on first launch without going through the menu first.
-        if (AppMenu.favoriteTeam() == null) {
-            Storage.setValue(AppMenu.STORAGE_KEY_FAVORITE, "HIFK");
-        }
+        Api.refreshNow();
     }
 
     function getInitialView() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {

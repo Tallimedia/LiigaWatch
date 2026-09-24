@@ -33,6 +33,15 @@ module Pages {
         dc.drawText(cx, y, Graphics.FONT_XTINY, text, Graphics.TEXT_JUSTIFY_CENTER);
     }
 
+    //! Centred one-line status message (loading / service unavailable) —
+    //! only reachable when MockData.isLiveSource() and Api hasn't got real
+    //! data yet, so a mock scenario never shows this.
+    function drawCenteredMessage(dc as Graphics.Dc, cx as Number, text as String) as Void {
+        dc.setColor(Theme.DIM, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(cx, (h(dc) * 0.46).toNumber(), Graphics.FONT_SMALL, text,
+                    Graphics.TEXT_JUSTIFY_CENTER);
+    }
+
     // ---------------------------------------------------------------
     // Today
     // ---------------------------------------------------------------
@@ -47,8 +56,20 @@ module Pages {
     //! unscrolled first screen without needing its own pin like Table's.
     function drawToday(dc as Graphics.Dc, scrollOffset as Number) as Number {
         var cx = w(dc) / 2;
-        var isToday = MockData.todayGames().size() > 0;
-        var games = orderFavoriteFirst(MockData.displayGames());
+
+        if (MockData.isLiveSource()) {
+            if (Api.gamesState == Api.STATE_LOADING && Api.displayGames.size() == 0) {
+                drawCenteredMessage(dc, cx, res(Rez.Strings.Loading));
+                return 0;
+            }
+            if (Api.gamesState == Api.STATE_ERROR && Api.displayGames.size() == 0) {
+                drawCenteredMessage(dc, cx, res(Rez.Strings.NoData));
+                return 0;
+            }
+        }
+
+        var isToday = MockData.activeIsShowingToday();
+        var games = orderFavoriteFirst(MockData.activeDisplayGames());
 
         // "Next games" still needs the actual date, and still uses real
         // rows below — 2026-09-24 fix: this used to be a bare date with no
@@ -56,7 +77,8 @@ module Pages {
         // nextGameDate response would ever look like.
         var headerText = isToday
             ? Lang.format(res(Rez.Strings.TodayHeaderGames), [todayDate()])
-            : Lang.format("$1$ $2$", [res(Rez.Strings.TodayHeaderNext), MockData.NEXT_GAME_DATE]);
+            : Lang.format("$1$ $2$", [res(Rez.Strings.TodayHeaderNext),
+                MockData.activeNextGameDateLabel()]);
         var compactHeader = headerText;
         // Range indicator only once scrolled, same convention as Table.
         // Compact fallback is the range alone — on a screen too narrow for
@@ -196,9 +218,21 @@ module Pages {
     //! (PageView), so the up/down vocabulary stays the same everywhere.
     function drawTable(dc as Graphics.Dc, scrollOffset as Number) as Number {
         var cx = w(dc) / 2;
+
+        if (MockData.isLiveSource()) {
+            if (Api.standingsState == Api.STATE_LOADING && Api.standings.size() == 0) {
+                drawCenteredMessage(dc, cx, res(Rez.Strings.Loading));
+                return 0;
+            }
+            if (Api.standingsState == Api.STATE_ERROR && Api.standings.size() == 0) {
+                drawCenteredMessage(dc, cx, res(Rez.Strings.NoData));
+                return 0;
+            }
+        }
+
         dc.setColor(Theme.DIM, Graphics.COLOR_TRANSPARENT);
         var headerY = (h(dc) * 0.06).toNumber();
-        var rows = MockData.standings();
+        var rows = MockData.activeStandings();
         // Range indicator only once scrolled — scrollOffset 0 stays a plain
         // "Table" title, matching the original quick-glance view exactly.
         var title = res(Rez.Strings.PageTable);
@@ -271,8 +305,8 @@ module Pages {
         var pts = Lang.format("$1$p", [r[:points]]);
         dc.drawText(rightX, y, Graphics.FONT_XTINY, pts, Graphics.TEXT_JUSTIFY_RIGHT);
 
-        // playoffsLines separators (MockData.PLAYOFF_LINES) — never
-        // hardcoded once the real backend exists (RESEARCH.md §1).
+        // playoffsLines separators — served by the real API, never
+        // hardcoded (RESEARCH.md §1).
         if (isPlayoffLine(r[:rank])) {
             dc.setColor(Theme.FAINT, Graphics.COLOR_TRANSPARENT);
             var lineY = y + rowH * 0.85;
@@ -281,7 +315,7 @@ module Pages {
     }
 
     function isPlayoffLine(rank as Number) as Boolean {
-        var lines = MockData.PLAYOFF_LINES;
+        var lines = MockData.activePlayoffLines();
         for (var i = 0; i < lines.size(); i++) {
             if (lines[i] == rank) { return true; }
         }
@@ -301,8 +335,12 @@ module Pages {
         dc.setColor(Theme.INK, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, (h(dc) * 0.30).toNumber(), Graphics.FONT_TINY,
                     "LiigaWatch 0.1.0", Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(cx, (h(dc) * 0.42).toNumber(), Graphics.FONT_TINY,
-                    "(sim beta — mock data)", Graphics.TEXT_JUSTIFY_CENTER);
+        // Only ever says "(mock data)" in the dev-only mock scenarios —
+        // real production installs never show anything here.
+        if (!MockData.isLiveSource()) {
+            dc.drawText(cx, (h(dc) * 0.42).toNumber(), Graphics.FONT_TINY,
+                        "(mock data)", Graphics.TEXT_JUSTIFY_CENTER);
+        }
 
         dc.setColor(Theme.DIM, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, (h(dc) * 0.58).toNumber(), Graphics.FONT_XTINY,

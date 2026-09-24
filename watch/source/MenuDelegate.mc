@@ -2,14 +2,19 @@ import Toybox.Application.Storage;
 import Toybox.Lang;
 import Toybox.WatchUi;
 
-//! Action menu. Two items in the sim beta:
+//! Action menu.
 //!
 //! - Cadence picker (RESEARCH.md §9) — visible every day, but on a day with
 //!   no games it shows the game-days-only explainer instead of the picker,
 //!   per the 2026-09-24 revision (always-visible, explained-not-hidden).
-//! - "Mock scenario" — sim-beta-only, cycles MockData through its three
-//!   Today-screen states so all of §8 can be eyeballed without a real game
-//!   day. Remove this item once the real backend replaces MockData.
+//! - Favourite team.
+//! - Refresh now — added once the real backend existed; bypasses Api's
+//!   MIN_REFRESH_SECS floor, same "force a refresh" role as
+//!   FIWeatherWatch's Select-triggered Api.refreshNow().
+//! - Data source — dev-only, cycles MockData between SOURCE_LIVE (the real
+//!   backend, the default) and its fixed test scenarios. Useful for
+//!   exercising Today-screen edge cases (no games, a full 8-game round)
+//!   that today's actual game day may not happen to show.
 module AppMenu {
 
     const STORAGE_KEY_CADENCE = "cadenceSeconds";
@@ -31,7 +36,7 @@ module AppMenu {
     function buildMenu() as WatchUi.Menu2 {
         var menu = new WatchUi.Menu2({});
 
-        if (MockData.hasLiveGame() || MockData.todayGames().size() > 0) {
+        if (MockData.activeIsGameDay()) {
             menu.addItem(new WatchUi.MenuItem(
                 Pages.res(Rez.Strings.MenuCadence),
                 cadenceSeconds().toString() + "s",
@@ -49,16 +54,21 @@ module AppMenu {
             (fav != null) ? fav : Pages.res(Rez.Strings.FavoriteTeamNone),
             :favoriteTeam, {}));
 
-        menu.addItem(new WatchUi.MenuItem("Mock scenario", scenarioLabel(), :scenario, {}));
+        if (MockData.isLiveSource()) {
+            menu.addItem(new WatchUi.MenuItem("Refresh now", null, :refresh, {}));
+        }
+
+        menu.addItem(new WatchUi.MenuItem("Data source", scenarioLabel(), :scenario, {}));
 
         return menu;
     }
 
     function scenarioLabel() as String {
-        if (MockData.scenario == MockData.SCENARIO_NO_GAMES) { return "No games"; }
-        if (MockData.scenario == MockData.SCENARIO_SCHEDULED) { return "Scheduled"; }
-        if (MockData.scenario == MockData.SCENARIO_FULL_ROUND) { return "Full round (8)"; }
-        return "Live";
+        if (MockData.scenario == MockData.SOURCE_LIVE) { return "Live"; }
+        if (MockData.scenario == MockData.SCENARIO_NO_GAMES) { return "Mock: No games"; }
+        if (MockData.scenario == MockData.SCENARIO_SCHEDULED) { return "Mock: Scheduled"; }
+        if (MockData.scenario == MockData.SCENARIO_FULL_ROUND) { return "Mock: Full round (8)"; }
+        return "Mock: Live game";
     }
 }
 
@@ -74,8 +84,12 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
             WatchUi.pushView(buildCadenceMenu(), new CadenceMenuDelegate(), WatchUi.SLIDE_UP);
         } else if (id == :favoriteTeam) {
             WatchUi.pushView(buildFavoriteTeamMenu(), new FavoriteTeamMenuDelegate(), WatchUi.SLIDE_UP);
+        } else if (id == :refresh) {
+            Api.refreshNow();
+            WatchUi.popView(WatchUi.SLIDE_DOWN);
         } else if (id == :scenario) {
-            // Dev-only cycle: no games -> scheduled -> live -> no games.
+            // Cycle: Live -> No games -> Scheduled -> Live game -> Full
+            // round -> back to Live.
             MockData.scenario = (MockData.scenario + 1) % MockData.SCENARIO_COUNT;
             WatchUi.requestUpdate();
             WatchUi.popView(WatchUi.SLIDE_DOWN);
@@ -108,15 +122,25 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
 
     //! Built from the standings order (already rank-sorted) rather than a
     //! separate hardcoded list, so it can't drift from Acronyms.CODES.
+    //! Falls back to Acronyms.CODES' own team list when standings haven't
+    //! loaded yet (live source, before the first successful fetch) — the
+    //! picker should never be empty just because Api hasn't responded yet.
     function buildFavoriteTeamMenu() as WatchUi.Menu2 {
         var menu = new WatchUi.Menu2({:title => Pages.res(Rez.Strings.MenuFavoriteTeam)});
         var current = AppMenu.favoriteTeam();
         var noneLabel = Pages.res(Rez.Strings.FavoriteTeamNone);
         if (current == null) { noneLabel = "> " + noneLabel; }
         menu.addItem(new WatchUi.MenuItem(noneLabel, null, "", {}));
-        var rows = MockData.standings();
-        for (var i = 0; i < rows.size(); i++) {
-            var name = rows[i][:name];
+
+        var names = [] as Array<String>;
+        var rows = MockData.activeStandings();
+        if (rows.size() > 0) {
+            for (var i = 0; i < rows.size(); i++) { names.add(rows[i][:name]); }
+        } else {
+            names = Acronyms.CODES.keys();
+        }
+        for (var i = 0; i < names.size(); i++) {
+            var name = names[i];
             var label = ((current != null) && current.equals(name)) ? "> " + name : name;
             menu.addItem(new WatchUi.MenuItem(label, null, name, {}));
         }

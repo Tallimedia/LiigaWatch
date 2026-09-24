@@ -1,32 +1,36 @@
 import Toybox.Lang;
 
-//! Static fixtures for the sim-only beta — no backend call exists yet
-//! (RESEARCH.md §9, Phase 1). Shapes match what the thinned backend
-//! response will actually carry (§5): team names, goals, start time,
-//! started/ended/currentPeriod/gameTime/finishedType for games; rank,
-//! name, games, points, goal difference for standings.
+//! Static fixtures — dev-only test data, **not the production data source**
+//! since 2026-09-24 (Api.mc, backed by the real liigawatch.tallimedia.com
+//! backend, took over that role). Kept because these fixtures exercise
+//! Today-screen edge cases (no games, a full 8-game round) that a given
+//! real game day may not happen to show — useful to keep testable without
+//! waiting for the right day. Shapes match what Api.mc's thinning produces,
+//! so Pages.mc draws either source identically.
 //!
 //! `gameTime` is the period-boundary value the real API returns, not a
 //! locally-ticking clock — see the live-verification note in RESEARCH.md
 //! §1. It is never recalculated here either, on purpose, so this fixture
 //! doesn't quietly teach the UI a habit the real data won't support.
 //!
-//! Four scenarios so every Today-screen state (§8) can be eyeballed in
-//! the sim without waiting for a real game day — switch with the action
-//! menu's dev-only "Mock scenario" item (MenuDelegate.mc, AppMenu module).
-//! FULL_ROUND added 2026-09-24 to answer "what happens on an 8-game day"
-//! (RESEARCH.md §5: the busiest sampled day was 7 games) directly in the
-//! sim rather than by reasoning about it — it exercises the Today screen's
-//! row-fit/ellipsis cutoff (§8) at a size the other three scenarios don't.
+//! `scenario` selects the active source, cycled from the action menu's
+//! "Data source" item (MenuDelegate.mc, AppMenu module) — SOURCE_LIVE (the
+//! default) reads from Api.mc; every other value reads one of these fixed
+//! fixtures instead. All call sites elsewhere in the app go through the
+//! `active*` functions below, never `MockData.todayGames()` etc directly,
+//! so they don't need to know which source is active.
 module MockData {
 
-    const SCENARIO_NO_GAMES = 0;
-    const SCENARIO_SCHEDULED = 1;
-    const SCENARIO_LIVE = 2;
-    const SCENARIO_FULL_ROUND = 3;
-    const SCENARIO_COUNT = 4;
+    const SOURCE_LIVE = 0;
+    const SCENARIO_NO_GAMES = 1;
+    const SCENARIO_SCHEDULED = 2;
+    const SCENARIO_LIVE_MOCK = 3;
+    const SCENARIO_FULL_ROUND = 4;
+    const SCENARIO_COUNT = 5;
 
-    var scenario = SCENARIO_LIVE;
+    var scenario = SOURCE_LIVE;
+
+    function isLiveSource() as Boolean { return scenario == SOURCE_LIVE; }
 
     const NEXT_GAME_DATE = "27.09.";
 
@@ -75,7 +79,7 @@ module MockData {
                   :period => 0, :gameTime => 0, :startTime => "18:30" },
             ];
         }
-        // SCENARIO_LIVE — one live, one final, one still scheduled later today.
+        // SCENARIO_LIVE_MOCK — one live, one final, one still scheduled later today.
         return [
             { :home => "HIFK", :away => "Kärpät", :homeGoals => 2, :awayGoals => 1,
               :started => true, :ended => false, :finishedType => "ACTIVE_OR_NOT_STARTED",
@@ -150,5 +154,36 @@ module MockData {
             }
         }
         return false;
+    }
+
+    // ---------------------------------------------------------------
+    // Active-source dispatch — every other file reads through these,
+    // never the fixture functions above directly, so nothing else in the
+    // app needs to know whether SOURCE_LIVE (Api.mc) or a mock scenario
+    // is currently selected.
+    // ---------------------------------------------------------------
+
+    function activeDisplayGames() as Array<Dictionary> {
+        return isLiveSource() ? Api.displayGames : displayGames();
+    }
+
+    function activeIsShowingToday() as Boolean {
+        return isLiveSource() ? Api.isShowingToday : (todayGames().size() > 0);
+    }
+
+    function activeNextGameDateLabel() as String {
+        return isLiveSource() ? Api.nextGameDateLabel : NEXT_GAME_DATE;
+    }
+
+    function activeStandings() as Array<Dictionary> {
+        return isLiveSource() ? Api.standings : standings();
+    }
+
+    function activePlayoffLines() as Array<Number> {
+        return isLiveSource() ? Api.playoffsLines : PLAYOFF_LINES;
+    }
+
+    function activeIsGameDay() as Boolean {
+        return isLiveSource() ? Api.isGameDay() : (todayGames().size() > 0);
     }
 }

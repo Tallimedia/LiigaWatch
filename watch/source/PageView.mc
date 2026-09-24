@@ -1,5 +1,6 @@
 import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.Timer;
 import Toybox.WatchUi;
 
 //! One view, three pages (Today / Table / About) — same flat-index pattern
@@ -14,6 +15,15 @@ import Toybox.WatchUi;
 //! Scrolling past either end of the content falls through to the
 //! neighbouring page — one gesture vocabulary throughout, no separate
 //! "scroll mode" to learn per page.
+//!
+//! Live polling, added once Api.mc/the real backend existed: a single
+//! Timer, started in onShow() and stopped in onHide(), refetches at
+//! AppMenu.cadenceSeconds() while there's a live game today. Re-reading
+//! the cadence in onShow() rather than wiring a live callback from the
+//! cadence picker is deliberate — popping back from that menu re-triggers
+//! onShow() on this view for free (standard Connect IQ view-stack
+//! behaviour), so the timer always restarts with whatever was just picked
+//! without needing its own notification path.
 class PageView extends WatchUi.View {
 
     const TODAY_PAGE = 0;
@@ -24,6 +34,7 @@ class PageView extends WatchUi.View {
     hidden var _todayRowsShown as Number = 1; // updated every Today draw
     hidden var _tableScroll as Number = 0;
     hidden var _tableRowsShown as Number = 1; // updated every Table draw
+    hidden var _timer as Timer.Timer?;
 
     function initialize() {
         View.initialize();
@@ -31,17 +42,49 @@ class PageView extends WatchUi.View {
 
     function pageCount() as Number { return 3; }
 
+    function onShow() as Void {
+        Api.refreshAll();
+        startPolling();
+    }
+
+    function onHide() as Void {
+        stopPolling();
+    }
+
+    //! Only while MockData.isLiveSource() — mock scenarios are static
+    //! fixtures, polling them would just redraw the same numbers — and
+    //! only on an actual game day, matching the cadence picker's own gating
+    //! in AppMenu.buildMenu() (RESEARCH.md §9: a quiet day's schedule
+    //! doesn't change hour to hour, so there is nothing to poll for).
+    hidden function startPolling() as Void {
+        stopPolling();
+        if (!MockData.isLiveSource() || !MockData.activeIsGameDay()) { return; }
+        _timer = new Timer.Timer();
+        _timer.start(method(:onPollTick), AppMenu.cadenceSeconds() * 1000, true);
+    }
+
+    hidden function stopPolling() as Void {
+        if (_timer != null) {
+            _timer.stop();
+            _timer = null;
+        }
+    }
+
+    function onPollTick() as Void {
+        Api.refreshAll();
+    }
+
     function next() as Void {
         if (_page == TODAY_PAGE) {
             var nextOffset = _todayScroll + _todayRowsShown;
-            if (nextOffset < MockData.displayGames().size()) {
+            if (nextOffset < MockData.activeDisplayGames().size()) {
                 _todayScroll = nextOffset;
                 WatchUi.requestUpdate();
                 return;
             }
         } else if (_page == TABLE_PAGE) {
             var nextOffset = _tableScroll + _tableRowsShown;
-            if (nextOffset < MockData.standings().size()) {
+            if (nextOffset < MockData.activeStandings().size()) {
                 _tableScroll = nextOffset;
                 WatchUi.requestUpdate();
                 return;
@@ -89,8 +132,8 @@ class PageView extends WatchUi.View {
 
 //! Swipe up/down or the physical up/down buttons move between pages (or
 //! scroll the Table page — see PageView). Menu button/long-press opens the
-//! action menu (MenuDelegate.mc, AppMenu module) — cadence and, for this
-//! sim-only build, the mock-scenario switch.
+//! action menu (MenuDelegate.mc, AppMenu module) — cadence, favourite team,
+//! a manual refresh, and the dev-only data-source switch.
 class PageDelegate extends WatchUi.BehaviorDelegate {
     hidden var _view as PageView;
 
@@ -111,9 +154,11 @@ class PageDelegate extends WatchUi.BehaviorDelegate {
     //! gesture depends on a per-device key mapping that isn't reliably
     //! reachable in the simulator (Nico, 2026-09-24). Select is always a
     //! clickable on-screen control in the sim, so this guarantees access
-    //! regardless of device skin. Once there's a real "refresh now" action
-    //! (once the backend exists), reconsider whether Select should do that
-    //! instead and move the menu back to onMenu-only.
+    //! regardless of device skin. Revisited once the backend existed and a
+    //! real "refresh now" action became possible: kept Select on the menu
+    //! rather than binding it directly to a refresh, since the sim-reach
+    //! problem onMenu() has is independent of the backend and still real —
+    //! "Refresh now" lives as its own menu item instead (MenuDelegate.mc).
     function onSelect() as Boolean {
         WatchUi.pushView(AppMenu.buildMenu(), new MenuDelegate(), WatchUi.SLIDE_UP);
         return true;
