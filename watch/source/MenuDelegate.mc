@@ -83,6 +83,12 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
         }
     }
 
+    //! Plain MenuItem, not CheckboxMenuItem — CheckboxMenuItem can only be
+    //! added to a WatchUi.CheckboxMenu container, not a Menu2 (crashed the
+    //! sim, 2026-09-24: "CheckboxMenuItem can only be added to
+    //! CheckboxMenu"). This is a single-choice list, not a multi-toggle
+    //! one, so a checkmark prefix on the current pick is enough — same
+    //! MenuItem-only pattern VolvoWatch's own action menu uses.
     function buildCadenceMenu() as WatchUi.Menu2 {
         var menu = new WatchUi.Menu2({:title => Pages.res(Rez.Strings.MenuCadence)});
         var current = AppMenu.cadenceSeconds();
@@ -90,8 +96,9 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
                        Rez.Strings.Cadence30s, Rez.Strings.Cadence60s];
         for (var i = 0; i < AppMenu.CADENCES.size(); i++) {
             var secs = AppMenu.CADENCES[i];
-            menu.addItem(new WatchUi.CheckboxMenuItem(
-                Pages.res(labels[i]), null, secs, secs == current, {}));
+            var label = Pages.res(labels[i]);
+            if (secs == current) { label = "✓ " + label; }
+            menu.addItem(new WatchUi.MenuItem(label, null, secs, {}));
         }
         return menu;
     }
@@ -101,13 +108,14 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
     function buildFavoriteTeamMenu() as WatchUi.Menu2 {
         var menu = new WatchUi.Menu2({:title => Pages.res(Rez.Strings.MenuFavoriteTeam)});
         var current = AppMenu.favoriteTeam();
-        menu.addItem(new WatchUi.CheckboxMenuItem(
-            Pages.res(Rez.Strings.FavoriteTeamNone), null, "", current == null, {}));
+        var noneLabel = Pages.res(Rez.Strings.FavoriteTeamNone);
+        if (current == null) { noneLabel = "✓ " + noneLabel; }
+        menu.addItem(new WatchUi.MenuItem(noneLabel, null, "", {}));
         var rows = MockData.standings();
         for (var i = 0; i < rows.size(); i++) {
             var name = rows[i][:name];
-            menu.addItem(new WatchUi.CheckboxMenuItem(
-                name, null, name, (current != null) && current.equals(name), {}));
+            var label = ((current != null) && current.equals(name)) ? "✓ " + name : name;
+            menu.addItem(new WatchUi.MenuItem(label, null, name, {}));
         }
         return menu;
     }
