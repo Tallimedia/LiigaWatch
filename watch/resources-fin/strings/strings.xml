@@ -11,6 +11,8 @@
     <string id="DisclaimerL1">Epävirallinen sovellus —</string>
     <string id="DisclaimerL2">ei liity Liigaan</string>
 
+    <string id="MenuFavoriteTeam">Suosikkijoukkue</string>
+    <string id="FavoriteTeamNone">Ei valittu</string>
     <string id="MenuCadence">Päivitystiheys</string>
     <string id="CadenceGameDaysOnly">Käytössä vain pelipäivinä</string>
     <string id="Cadence5s">5 sekuntia</string>

@@ -15,9 +15,17 @@ module AppMenu {
     const STORAGE_KEY_CADENCE = "cadenceSeconds";
     const CADENCES = [5, 15, 30, 60];
 
+    const STORAGE_KEY_FAVORITE = "favoriteTeam";
+
     function cadenceSeconds() as Number {
         var v = Storage.getValue(STORAGE_KEY_CADENCE);
         return (v != null) ? v : 30;
+    }
+
+    //! Full team name (matches MockData's :name/:home/:away strings
+    //! directly, no acronym translation needed), or null for "no favourite".
+    function favoriteTeam() as String? {
+        return Storage.getValue(STORAGE_KEY_FAVORITE);
     }
 
     function buildMenu() as WatchUi.Menu2 {
@@ -34,6 +42,12 @@ module AppMenu {
                 Pages.res(Rez.Strings.CadenceGameDaysOnly),
                 :cadenceDisabled, {}));
         }
+
+        var fav = favoriteTeam();
+        menu.addItem(new WatchUi.MenuItem(
+            Pages.res(Rez.Strings.MenuFavoriteTeam),
+            (fav != null) ? fav : Pages.res(Rez.Strings.FavoriteTeamNone),
+            :favoriteTeam, {}));
 
         menu.addItem(new WatchUi.MenuItem("Mock scenario", scenarioLabel(), :scenario, {}));
 
@@ -57,6 +71,8 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
         var id = item.getId();
         if (id == :cadence) {
             WatchUi.pushView(buildCadenceMenu(), new CadenceMenuDelegate(), WatchUi.SLIDE_UP);
+        } else if (id == :favoriteTeam) {
+            WatchUi.pushView(buildFavoriteTeamMenu(), new FavoriteTeamMenuDelegate(), WatchUi.SLIDE_UP);
         } else if (id == :scenario) {
             // Dev-only cycle: no games -> scheduled -> live -> no games.
             MockData.scenario = (MockData.scenario + 1) % 3;
@@ -79,6 +95,22 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
         }
         return menu;
     }
+
+    //! Built from the standings order (already rank-sorted) rather than a
+    //! separate hardcoded list, so it can't drift from Acronyms.CODES.
+    function buildFavoriteTeamMenu() as WatchUi.Menu2 {
+        var menu = new WatchUi.Menu2({:title => Pages.res(Rez.Strings.MenuFavoriteTeam)});
+        var current = AppMenu.favoriteTeam();
+        menu.addItem(new WatchUi.CheckboxMenuItem(
+            Pages.res(Rez.Strings.FavoriteTeamNone), null, "", current == null, {}));
+        var rows = MockData.standings();
+        for (var i = 0; i < rows.size(); i++) {
+            var name = rows[i][:name];
+            menu.addItem(new WatchUi.CheckboxMenuItem(
+                name, null, name, (current != null) && current.equals(name), {}));
+        }
+        return menu;
+    }
 }
 
 class CadenceMenuDelegate extends WatchUi.Menu2InputDelegate {
@@ -89,6 +121,25 @@ class CadenceMenuDelegate extends WatchUi.Menu2InputDelegate {
 
     function onSelect(item as WatchUi.MenuItem) as Void {
         Storage.setValue(AppMenu.STORAGE_KEY_CADENCE, item.getId());
+        WatchUi.popView(WatchUi.SLIDE_DOWN);
+        WatchUi.popView(WatchUi.SLIDE_DOWN);
+    }
+}
+
+class FavoriteTeamMenuDelegate extends WatchUi.Menu2InputDelegate {
+
+    function initialize() {
+        Menu2InputDelegate.initialize();
+    }
+
+    function onSelect(item as WatchUi.MenuItem) as Void {
+        var name = item.getId() as String;
+        if (name.equals("")) {
+            Storage.deleteValue(AppMenu.STORAGE_KEY_FAVORITE);
+        } else {
+            Storage.setValue(AppMenu.STORAGE_KEY_FAVORITE, name);
+        }
+        WatchUi.requestUpdate();
         WatchUi.popView(WatchUi.SLIDE_DOWN);
         WatchUi.popView(WatchUi.SLIDE_DOWN);
     }

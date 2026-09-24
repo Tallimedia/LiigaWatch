@@ -11,6 +11,8 @@
     <string id="DisclaimerL1">Inofficiell app —</string>
     <string id="DisclaimerL2">inte kopplad till Liiga</string>
 
+    <string id="MenuFavoriteTeam">Favoritlag</string>
+    <string id="FavoriteTeamNone">Ingen</string>
     <string id="MenuCadence">Uppdateringsfrekvens</string>
     <string id="CadenceGameDaysOnly">Endast tillgänglig på matchdagar</string>
     <string id="Cadence5s">5 sekunder</string>

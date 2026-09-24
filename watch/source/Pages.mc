@@ -75,6 +75,13 @@ module Pages {
     //! then the score line. `gameTime` here is always the period-boundary
     //! value the real API returns (never a locally-ticked clock) — carried
     //! straight through from MockData, per RESEARCH.md §1.
+    //!
+    //! The score line uses Theme.FAVORITE instead of INK when either side
+    //! is the user's chosen team (AppMenu.favoriteTeam(), 2026-09-24
+    //! addition) — one accent colour for "your team", not a per-team
+    //! colour table, so this doesn't reopen the "no team colours" v1 call.
+    //! The status line keeps its own colour (LIVE/DIM) either way, so a
+    //! favourite team's live game still reads as live.
     function drawGameRow(dc as Graphics.Dc, g as Dictionary, cx as Number, top as Number,
                           statusH as Number, scoreH as Number, withinGap as Number) as Void {
         var status;
@@ -91,9 +98,12 @@ module Pages {
         dc.setColor(statusColor, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, top, Graphics.FONT_XTINY, status, Graphics.TEXT_JUSTIFY_CENTER);
 
+        var fav = AppMenu.favoriteTeam();
+        var isFavorite = (fav != null) && (fav.equals(g[:home]) || fav.equals(g[:away]));
+
         var line = Lang.format("$1$ $2$ – $3$ $4$",
             [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])]);
-        dc.setColor(Theme.INK, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(isFavorite ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, top + statusH + withinGap, Graphics.FONT_SMALL, line,
                     Graphics.TEXT_JUSTIFY_CENTER);
     }
@@ -140,31 +150,57 @@ module Pages {
         var leftX = (w(dc) * 0.12).toNumber();
         var rightX = (w(dc) * 0.88).toNumber();
 
+        var fav = AppMenu.favoriteTeam();
+        var favoriteIdx = -1;
+        if (fav != null) {
+            for (var i = 0; i < rows.size(); i++) {
+                if (fav.equals(rows[i][:name])) { favoriteIdx = i; break; }
+            }
+        }
+
         var shown = 0;
         for (var i = 0; i < rows.size(); i++) {
             var y = top + shown * rowH;
             if (y + rowH > bottomLimit) { break; }
-
-            var r = rows[i];
-            dc.setColor(Theme.INK, Graphics.COLOR_TRANSPARENT);
-            var label = Lang.format("$1$ $2$", [r[:rank], r[:name]]);
-            dc.drawText(leftX, y, Graphics.FONT_XTINY, label, Graphics.TEXT_JUSTIFY_LEFT);
-            var pts = Lang.format("$1$p", [r[:points]]);
-            dc.drawText(rightX, y, Graphics.FONT_XTINY, pts, Graphics.TEXT_JUSTIFY_RIGHT);
-
-            // playoffsLines separators (MockData.PLAYOFF_LINES) — never
-            // hardcoded once the real backend exists (RESEARCH.md §1).
-            if (isPlayoffLine(r[:rank])) {
-                dc.setColor(Theme.FAINT, Graphics.COLOR_TRANSPARENT);
-                var lineY = y + rowH * 0.85;
-                dc.drawLine(leftX, lineY, rightX, lineY);
-            }
+            drawStandingsRow(dc, rows[i], leftX, rightX, y, rowH, i == favoriteIdx);
             shown += 1;
         }
+
+        // Favourite team pinned as the last row when the cut-off left it
+        // out — 2026-09-24 addition: "always shown, highlighted, even if
+        // not in the visible range". Replaces the generic "+N" overflow
+        // line so it costs no extra vertical space; if the favourite is
+        // already visible above, the ordinary "+N" still runs as before.
         if (shown < rows.size()) {
+            if (favoriteIdx >= shown) {
+                drawStandingsRow(dc, rows[favoriteIdx], leftX, rightX, top + shown * rowH,
+                                  rowH, true);
+            } else {
+                dc.setColor(Theme.FAINT, Graphics.COLOR_TRANSPARENT);
+                dc.drawText(cx, top + shown * rowH, Graphics.FONT_XTINY,
+                            Lang.format("+$1$", [rows.size() - shown]), Graphics.TEXT_JUSTIFY_CENTER);
+            }
+        }
+    }
+
+    //! One standings row. `highlight` is Theme.FAVORITE for the user's
+    //! chosen team (a single accent for "your team", distinct from any
+    //! per-team colour table — see the note on drawGameRow).
+    function drawStandingsRow(dc as Graphics.Dc, r as Dictionary, leftX as Number,
+                               rightX as Number, y as Number, rowH as Number,
+                               highlight as Boolean) as Void {
+        dc.setColor(highlight ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
+        var label = Lang.format("$1$ $2$", [r[:rank], r[:name]]);
+        dc.drawText(leftX, y, Graphics.FONT_XTINY, label, Graphics.TEXT_JUSTIFY_LEFT);
+        var pts = Lang.format("$1$p", [r[:points]]);
+        dc.drawText(rightX, y, Graphics.FONT_XTINY, pts, Graphics.TEXT_JUSTIFY_RIGHT);
+
+        // playoffsLines separators (MockData.PLAYOFF_LINES) — never
+        // hardcoded once the real backend exists (RESEARCH.md §1).
+        if (isPlayoffLine(r[:rank])) {
             dc.setColor(Theme.FAINT, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, top + shown * rowH, Graphics.FONT_XTINY,
-                        Lang.format("+$1$", [rows.size() - shown]), Graphics.TEXT_JUSTIFY_CENTER);
+            var lineY = y + rowH * 0.85;
+            dc.drawLine(leftX, lineY, rightX, lineY);
         }
     }
 
