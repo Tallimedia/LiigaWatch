@@ -101,9 +101,16 @@ def _thin_team(team: dict[str, Any]) -> dict[str, Any]:
 
 
 def _thin_game(game: dict[str, Any]) -> dict[str, Any]:
+    # liiga.fi's `start` is UTC. The watch has no timezone database and
+    # should not need one for something this small — the backend does the
+    # reshaping (same principle as FIWeatherWatch's Api.mc), so
+    # `startTime` arrives pre-formatted in Finnish local time.
+    start_utc = datetime.fromisoformat(game["start"])
+    start_local = start_utc.astimezone(_HELSINKI)
     return {
         "id": game["id"],
         "start": game["start"],
+        "startTime": start_local.strftime("%H:%M"),
         "home": _thin_team(game["homeTeam"]),
         "away": _thin_team(game["awayTeam"]),
         "started": game["started"],
