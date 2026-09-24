@@ -21,7 +21,15 @@ module Pages {
     // Today
     // ---------------------------------------------------------------
 
-    function drawToday(dc as Graphics.Dc) as Void {
+    //! Draws whichever window of today's games starts at `scrollOffset` and
+    //! returns how many it actually fit — same scroll-by-real-shown-count
+    //! pattern as drawTable (2026-09-24), added right after Table got it:
+    //! a busy day cut off at 3 games with an ellipsis and no way to reach
+    //! the rest was the same gap, just not yet fixed here (Nico, same
+    //! session). The favourite's game is still floated to index 0 by
+    //! orderFavoriteFirst regardless of scroll, so it's always on the
+    //! unscrolled first screen without needing its own pin like Table's.
+    function drawToday(dc as Graphics.Dc, scrollOffset as Number) as Number {
         var cx = w(dc) / 2;
         var games = orderFavoriteFirst(MockData.todayGames());
 
@@ -35,10 +43,15 @@ module Pages {
             dc.setColor(Theme.INK, Graphics.COLOR_TRANSPARENT);
             dc.drawText(cx, (h(dc) * 0.30).toNumber(), Graphics.FONT_MEDIUM,
                         MockData.NEXT_GAME_DATE, Graphics.TEXT_JUSTIFY_CENTER);
-            return;
+            return 0;
         }
 
         headerText = Lang.format(res(Rez.Strings.TodayHeaderGames), [todayDate()]);
+        // Range indicator only once scrolled, same convention as Table.
+        if (scrollOffset > 0) {
+            headerText = Lang.format("$1$ $2$–$3$", [headerText, scrollOffset + 1,
+                (scrollOffset + 3 < games.size()) ? scrollOffset + 3 : games.size()]);
+        }
         dc.setColor(Theme.DIM, Graphics.COLOR_TRANSPARENT);
         var headerY = (h(dc) * 0.08).toNumber();
         dc.drawText(cx, headerY, Graphics.FONT_XTINY, headerText, Graphics.TEXT_JUSTIFY_CENTER);
@@ -47,8 +60,8 @@ module Pages {
         // height — that was the bug behind the first sim screenshot
         // (2026-09-24): games ran off the bottom because rowH was computed
         // from height/gameCount without checking it against what the two
-        // text lines actually need. Games that don't fit are dropped in
-        // favour of an ellipsis rather than drawn cramped/overlapping.
+        // text lines actually need. Games that don't fit on this screen are
+        // reachable by scrolling (PageView), not dropped.
         var statusH = dc.getFontHeight(Graphics.FONT_XTINY);
         var scoreH = dc.getFontHeight(Graphics.FONT_SMALL);
         var withinGap = (h(dc) * 0.01).toNumber();
@@ -59,16 +72,17 @@ module Pages {
         var bottomLimit = (h(dc) * 0.90).toNumber();
 
         var shown = 0;
-        for (var i = 0; i < games.size(); i++) {
+        for (var i = scrollOffset; i < games.size(); i++) {
             if (top + blockH > bottomLimit) { break; }
             drawGameRow(dc, games[i], cx, top, statusH, scoreH, withinGap);
             top += blockH + betweenGap;
             shown += 1;
         }
-        if (shown < games.size()) {
+        if (scrollOffset + shown < games.size()) {
             dc.setColor(Theme.FAINT, Graphics.COLOR_TRANSPARENT);
             dc.drawText(cx, top, Graphics.FONT_XTINY, "…", Graphics.TEXT_JUSTIFY_CENTER);
         }
+        return shown;
     }
 
     //! Favourite's game always visible, same principle as the Table pin

@@ -6,17 +6,22 @@ import Toybox.WatchUi;
 //! as FIWeatherWatch's PageView, so page order is a one-line change and the
 //! memory footprint stays flat across the device spread in manifest.xml.
 //!
-//! Table scroll, added 2026-09-24 (Nico: "how would I view full list?"):
-//! up/down page between Today/Table/About as before, but while ON the
-//! Table page they scroll its rows instead, using Pages.drawTable's real
-//! shown-row count rather than a guessed step. Scrolling past either end
-//! of the table falls through to the neighbouring page — one gesture
-//! vocabulary throughout, no separate "scroll mode".
+//! Today and Table both scroll, added 2026-09-24 (Nico: "how would I view
+//! full list?", then the same gap on Today: "only three games on the
+//! first page"): up/down page between Today/Table/About as before, but
+//! while ON a scrollable page they scroll its rows instead, using each
+//! draw function's real shown-row count rather than a guessed step.
+//! Scrolling past either end of the content falls through to the
+//! neighbouring page — one gesture vocabulary throughout, no separate
+//! "scroll mode" to learn per page.
 class PageView extends WatchUi.View {
 
+    const TODAY_PAGE = 0;
     const TABLE_PAGE = 1;
 
     hidden var _page as Number = 0;
+    hidden var _todayScroll as Number = 0;
+    hidden var _todayRowsShown as Number = 1; // updated every Today draw
     hidden var _tableScroll as Number = 0;
     hidden var _tableRowsShown as Number = 1; // updated every Table draw
 
@@ -27,7 +32,14 @@ class PageView extends WatchUi.View {
     function pageCount() as Number { return 3; }
 
     function next() as Void {
-        if (_page == TABLE_PAGE) {
+        if (_page == TODAY_PAGE) {
+            var nextOffset = _todayScroll + _todayRowsShown;
+            if (nextOffset < MockData.todayGames().size()) {
+                _todayScroll = nextOffset;
+                WatchUi.requestUpdate();
+                return;
+            }
+        } else if (_page == TABLE_PAGE) {
             var nextOffset = _tableScroll + _tableRowsShown;
             if (nextOffset < MockData.standings().size()) {
                 _tableScroll = nextOffset;
@@ -36,25 +48,39 @@ class PageView extends WatchUi.View {
             }
         }
         _page = (_page + 1) % pageCount();
-        if (_page == TABLE_PAGE) { _tableScroll = 0; } // always start at the pinned quick-glance view
+        resetScrollOnEntry();
         WatchUi.requestUpdate();
     }
 
     function prev() as Void {
+        if (_page == TODAY_PAGE && _todayScroll > 0) {
+            _todayScroll = (_todayScroll - _todayRowsShown > 0) ? _todayScroll - _todayRowsShown : 0;
+            WatchUi.requestUpdate();
+            return;
+        }
         if (_page == TABLE_PAGE && _tableScroll > 0) {
             _tableScroll = (_tableScroll - _tableRowsShown > 0) ? _tableScroll - _tableRowsShown : 0;
             WatchUi.requestUpdate();
             return;
         }
         _page = (_page + pageCount() - 1) % pageCount();
-        if (_page == TABLE_PAGE) { _tableScroll = 0; }
+        resetScrollOnEntry();
         WatchUi.requestUpdate();
+    }
+
+    //! Entering a scrollable page always starts at the top — Today's
+    //! favourite-first reorder and Table's favourite pin both rely on this
+    //! being the unscrolled default view every time, not wherever a
+    //! previous visit left off.
+    function resetScrollOnEntry() as Void {
+        if (_page == TODAY_PAGE) { _todayScroll = 0; }
+        if (_page == TABLE_PAGE) { _tableScroll = 0; }
     }
 
     function onUpdate(dc as Graphics.Dc) as Void {
         dc.setColor(Theme.INK, Theme.BG);
         dc.clear();
-        if (_page == 0) { Pages.drawToday(dc); }
+        if (_page == TODAY_PAGE) { _todayRowsShown = Pages.drawToday(dc, _todayScroll); }
         else if (_page == TABLE_PAGE) { _tableRowsShown = Pages.drawTable(dc, _tableScroll); }
         else { Pages.drawAbout(dc); }
         Pages.drawPager(dc, _page, pageCount());
