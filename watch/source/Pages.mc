@@ -23,7 +23,7 @@ module Pages {
 
     function drawToday(dc as Graphics.Dc) as Void {
         var cx = w(dc) / 2;
-        var games = MockData.todayGames();
+        var games = orderFavoriteFirst(MockData.todayGames());
 
         var headerText;
         if (games.size() == 0) {
@@ -69,6 +69,32 @@ module Pages {
             dc.setColor(Theme.FAINT, Graphics.COLOR_TRANSPARENT);
             dc.drawText(cx, top, Graphics.FONT_XTINY, "…", Graphics.TEXT_JUSTIFY_CENTER);
         }
+    }
+
+    //! Favourite's game always visible, same principle as the Table pin
+    //! (§8a) — 2026-09-24, prompted by "what if there's a full 8-game
+    //! round": without this, a favourite team playing late in the list
+    //! could fall past the ellipsis cutoff on a busy day and never be seen
+    //! at all, which defeats the point of picking one. Moves that one game
+    //! to the front; every other game keeps its original relative order.
+    function orderFavoriteFirst(games as Array<Dictionary>) as Array<Dictionary> {
+        var fav = AppMenu.favoriteTeam();
+        if (fav == null) { return games; }
+
+        var favIdx = -1;
+        for (var i = 0; i < games.size(); i++) {
+            if (fav.equals(games[i][:home]) || fav.equals(games[i][:away])) {
+                favIdx = i;
+                break;
+            }
+        }
+        if (favIdx <= 0) { return games; } // not playing today, or already first
+
+        var ordered = [games[favIdx]];
+        for (var i = 0; i < games.size(); i++) {
+            if (i != favIdx) { ordered.add(games[i]); }
+        }
+        return ordered;
     }
 
     //! One game: a status line (kickoff time / live period+clock / FINAL),
@@ -127,23 +153,31 @@ module Pages {
 
     //! All 17 rows drawn, no independent scroll yet — acceptable for the
     //! sim-only beta; RESEARCH.md §8 already flags the real scroll strategy
-    //! as a Phase 2 requirement once real device metrics are in hand.
     //! Row height from the font's real metrics, not height/17 — the second
     //! sim-beta bug (2026-09-24): every row overlapped the next because a
     //! 260px-tall screen divided by 17 gives ~12px rows, well under any
-    //! font's actual height. Draws only as many rows as legibly fit and
-    //! shows a "+N" tail instead of cramming the rest in illegibly.
-    //! RESEARCH.md §8 already flags a real scroll strategy as Phase 2 work
-    //! once device metrics are in hand — this is the sim-beta placeholder
-    //! for that, not the final answer.
-    function drawTable(dc as Graphics.Dc) as Void {
+    //! font's actual height. Draws whichever window of the list starts at
+    //! `scrollOffset` and returns how many rows it actually fit, so
+    //! PageView.next()/prev() can page through the full 17 rows by real
+    //! device metrics rather than a hardcoded step count — added
+    //! 2026-09-24 after Nico noted an 8-row-visible table has no way to
+    //! reach ranks 8–13/15–17 otherwise. Up/down scroll the table while on
+    //! this page; scrolling past either end moves to the neighbouring page
+    //! (PageView), so the up/down vocabulary stays the same everywhere.
+    function drawTable(dc as Graphics.Dc, scrollOffset as Number) as Number {
         var cx = w(dc) / 2;
         dc.setColor(Theme.DIM, Graphics.COLOR_TRANSPARENT);
         var headerY = (h(dc) * 0.06).toNumber();
-        dc.drawText(cx, headerY, Graphics.FONT_XTINY, res(Rez.Strings.PageTable),
-                    Graphics.TEXT_JUSTIFY_CENTER);
-
         var rows = MockData.standings();
+        // Range indicator only once scrolled — scrollOffset 0 stays a plain
+        // "Table" title, matching the original quick-glance view exactly.
+        var title = res(Rez.Strings.PageTable);
+        if (scrollOffset > 0) {
+            title = Lang.format("$1$ $2$–$3$", [title, scrollOffset + 1,
+                (scrollOffset + 7 < rows.size()) ? scrollOffset + 7 : rows.size()]);
+        }
+        dc.drawText(cx, headerY, Graphics.FONT_XTINY, title, Graphics.TEXT_JUSTIFY_CENTER);
+
         var rowH = dc.getFontHeight(Graphics.FONT_XTINY) + (h(dc) * 0.015).toNumber();
         var top = headerY + (h(dc) * 0.10).toNumber();
         // Bottom limit and side margins pulled in further than a naive
@@ -164,28 +198,32 @@ module Pages {
         }
 
         var shown = 0;
-        for (var i = 0; i < rows.size(); i++) {
+        for (var i = scrollOffset; i < rows.size(); i++) {
             var y = top + shown * rowH;
             if (y + rowH > bottomLimit) { break; }
             drawStandingsRow(dc, rows[i], leftX, rightX, y, rowH, i == favoriteIdx);
             shown += 1;
         }
 
-        // Favourite team pinned as the last row when the cut-off left it
-        // out — 2026-09-24 addition: "always shown, highlighted, even if
-        // not in the visible range". Replaces the generic "+N" overflow
-        // line so it costs no extra vertical space; if the favourite is
-        // already visible above, the ordinary "+N" still runs as before.
-        if (shown < rows.size()) {
-            if (favoriteIdx >= shown) {
+        // Favourite team pinned as the last row when this screen's cut-off
+        // left it out — but only on the unscrolled default view
+        // (scrollOffset 0). That is the "quick glance, no scrolling
+        // needed" guarantee from the original ask; once the user has
+        // scrolled at all they can see the favourite in its real position
+        // when they reach it, so a second pin on every screen would be
+        // redundant clutter rather than useful.
+        var lastIdx = scrollOffset + shown;
+        if (lastIdx < rows.size()) {
+            if (scrollOffset == 0 && favoriteIdx >= shown) {
                 drawStandingsRow(dc, rows[favoriteIdx], leftX, rightX, top + shown * rowH,
                                   rowH, true);
             } else {
                 dc.setColor(Theme.FAINT, Graphics.COLOR_TRANSPARENT);
                 dc.drawText(cx, top + shown * rowH, Graphics.FONT_XTINY,
-                            Lang.format("+$1$", [rows.size() - shown]), Graphics.TEXT_JUSTIFY_CENTER);
+                            Lang.format("+$1$", [rows.size() - lastIdx]), Graphics.TEXT_JUSTIFY_CENTER);
             }
         }
+        return shown;
     }
 
     //! One standings row. `highlight` is Theme.FAVORITE for the user's

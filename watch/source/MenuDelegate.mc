@@ -57,6 +57,7 @@ module AppMenu {
     function scenarioLabel() as String {
         if (MockData.scenario == MockData.SCENARIO_NO_GAMES) { return "No games"; }
         if (MockData.scenario == MockData.SCENARIO_SCHEDULED) { return "Scheduled"; }
+        if (MockData.scenario == MockData.SCENARIO_FULL_ROUND) { return "Full round (8)"; }
         return "Live";
     }
 }
@@ -75,7 +76,7 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
             WatchUi.pushView(buildFavoriteTeamMenu(), new FavoriteTeamMenuDelegate(), WatchUi.SLIDE_UP);
         } else if (id == :scenario) {
             // Dev-only cycle: no games -> scheduled -> live -> no games.
-            MockData.scenario = (MockData.scenario + 1) % 3;
+            MockData.scenario = (MockData.scenario + 1) % MockData.SCENARIO_COUNT;
             WatchUi.requestUpdate();
             WatchUi.popView(WatchUi.SLIDE_DOWN);
         } else {
