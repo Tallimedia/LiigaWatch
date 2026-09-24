@@ -87,8 +87,10 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
     //! added to a WatchUi.CheckboxMenu container, not a Menu2 (crashed the
     //! sim, 2026-09-24: "CheckboxMenuItem can only be added to
     //! CheckboxMenu"). This is a single-choice list, not a multi-toggle
-    //! one, so a checkmark prefix on the current pick is enough — same
-    //! MenuItem-only pattern VolvoWatch's own action menu uses.
+    //! one, so a "> " prefix on the current pick is enough — same
+    //! MenuItem-only pattern VolvoWatch's own action menu uses. Plain ASCII
+    //! deliberately, not a ✓ glyph: the watch font doesn't have one and
+    //! rendered a missing-glyph placeholder instead (same sim session).
     function buildCadenceMenu() as WatchUi.Menu2 {
         var menu = new WatchUi.Menu2({:title => Pages.res(Rez.Strings.MenuCadence)});
         var current = AppMenu.cadenceSeconds();
@@ -97,7 +99,7 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
         for (var i = 0; i < AppMenu.CADENCES.size(); i++) {
             var secs = AppMenu.CADENCES[i];
             var label = Pages.res(labels[i]);
-            if (secs == current) { label = "✓ " + label; }
+            if (secs == current) { label = "> " + label; }
             menu.addItem(new WatchUi.MenuItem(label, null, secs, {}));
         }
         return menu;
@@ -109,12 +111,12 @@ class MenuDelegate extends WatchUi.Menu2InputDelegate {
         var menu = new WatchUi.Menu2({:title => Pages.res(Rez.Strings.MenuFavoriteTeam)});
         var current = AppMenu.favoriteTeam();
         var noneLabel = Pages.res(Rez.Strings.FavoriteTeamNone);
-        if (current == null) { noneLabel = "✓ " + noneLabel; }
+        if (current == null) { noneLabel = "> " + noneLabel; }
         menu.addItem(new WatchUi.MenuItem(noneLabel, null, "", {}));
         var rows = MockData.standings();
         for (var i = 0; i < rows.size(); i++) {
             var name = rows[i][:name];
-            var label = ((current != null) && current.equals(name)) ? "✓ " + name : name;
+            var label = ((current != null) && current.equals(name)) ? "> " + name : name;
             menu.addItem(new WatchUi.MenuItem(label, null, name, {}));
         }
         return menu;
