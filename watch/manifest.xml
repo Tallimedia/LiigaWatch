@@ -23,7 +23,9 @@
         <iq:product id="fenix847mm"/>
         <iq:product id="fenix7s"/>
         <iq:product id="venu3s"/>
+        <iq:product id="venu3"/>
         <iq:product id="instinct2"/>
+        <iq:product id="fr265"/>
         </iq:products>
 
         <iq:permissions>
