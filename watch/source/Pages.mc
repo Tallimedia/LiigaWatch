@@ -179,11 +179,37 @@ module Pages {
         var fav = AppMenu.favoriteTeam();
         var isFavorite = (fav != null) && (fav.equals(g[:home]) || fav.equals(g[:away]));
 
+        // DEMO ONLY - logo preview for Nico, not for the shipped app (no
+        // permission yet - LOGO-PERMISSION-REQUEST.md). Hardcoded to
+        // whichever two teams happen to be playing today; revert before
+        // committing anything.
+        var homeLogo = demoLogo(g[:home]);
+        var awayLogo = demoLogo(g[:away]);
+        if (homeLogo != null && awayLogo != null) {
+            var rowY = top + statusH + withinGap;
+            var scoreText = Lang.format("$1$ – $2$", [g[:homeGoals], g[:awayGoals]]);
+            var scoreW = dc.getTextWidthInPixels(scoreText, Graphics.FONT_SMALL);
+            var logoSize = 60;
+            var gap = 10;
+            dc.drawBitmap(cx - scoreW / 2 - gap - logoSize, rowY - logoSize / 2, homeLogo);
+            dc.setColor(isFavorite ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(cx, rowY, Graphics.FONT_SMALL, scoreText, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawBitmap(cx + scoreW / 2 + gap, rowY - logoSize / 2, awayLogo);
+            return;
+        }
+
         var line = Lang.format("$1$ $2$ – $3$ $4$",
             [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])]);
         dc.setColor(isFavorite ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, top + statusH + withinGap, Graphics.FONT_SMALL, line,
                     Graphics.TEXT_JUSTIFY_CENTER);
+    }
+
+    //! DEMO ONLY - see drawGameRow.
+    function demoLogo(teamName as String) as WatchUi.BitmapResource? {
+        if (teamName.equals("Ilves")) { return WatchUi.loadResource(Rez.Drawables.DemoLogoIlves) as WatchUi.BitmapResource; }
+        if (teamName.equals("TPS")) { return WatchUi.loadResource(Rez.Drawables.DemoLogoTps) as WatchUi.BitmapResource; }
+        return null;
     }
 
     //! Seconds since period start -> "MM:SS". Only ever fed a value straight
