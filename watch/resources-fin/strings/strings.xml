@@ -20,6 +20,16 @@
     <string id="Cadence30s">30 sekuntia</string>
     <string id="Cadence60s">60 sekuntia</string>
 
-    <string id="Loading">Ladataan…</string>
+    <string id="Loading" scope="glance">Ladataan…</string>
     <string id="NoData">Palvelu ei käytettävissä</string>
+
+    <string id="GlanceHeadline" scope="glance">SM-Liiga</string>
+    <string id="GlanceNoGamesToday" scope="glance">Ei pelejä tänään</string>
+    <string id="GlanceGamesToday" scope="glance">$1$ peliä tänään</string>
+    <string id="GlanceGameToday" scope="glance">1 peli tänään</string>
+    <string id="GlanceGamesTomorrow" scope="glance">$1$ peliä huomenna</string>
+    <string id="GlanceGameTomorrow" scope="glance">1 peli huomenna</string>
+    <string id="GlanceGamesOn" scope="glance">$1$ peliä $2$</string>
+    <string id="GlanceGameOn" scope="glance">1 peli $1$</string>
+    <string id="GlanceNextGame" scope="glance">Seuraava peli $1$</string>
 </strings>

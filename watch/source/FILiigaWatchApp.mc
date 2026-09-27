@@ -20,4 +20,10 @@ class FILiigaWatchApp extends Application.AppBase {
         var view = new PageView();
         return [view, new PageDelegate(view)];
     }
+
+    //! Card in the glance loop — required on API 4.0.0+ devices for the
+    //! widget to have a persistent glance-list entry at all (2026-09-27).
+    function getGlanceView() as [WatchUi.GlanceView] or [WatchUi.GlanceView, WatchUi.GlanceViewDelegate] or Null {
+        return [new GlanceView()];
+    }
 }

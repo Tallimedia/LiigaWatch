@@ -1,5 +1,6 @@
 import Toybox.Graphics;
 
+(:glance)
 module Theme {
     const INK = Graphics.COLOR_WHITE;
     const DIM = Graphics.COLOR_LT_GRAY;

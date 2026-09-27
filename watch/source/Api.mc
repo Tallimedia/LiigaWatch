@@ -16,6 +16,11 @@ import Toybox.WatchUi;
 //! FILiigaWatch has no equivalent case where stale scores from a previous
 //! session are worth showing over a clean "loading"/"unavailable" state on
 //! a fresh launch. Revisit if that assumption turns out wrong in practice.
+//!
+//! (:glance) so GlanceView.mc can read the cached games/standings state —
+//! Garmin's docs say Glance is allowed to make web requests, but the glance
+//! here deliberately never calls fetchGames() etc. itself (see GlanceView.mc).
+(:glance)
 module Api {
 
     enum { STATE_IDLE, STATE_LOADING, STATE_OK, STATE_ERROR }

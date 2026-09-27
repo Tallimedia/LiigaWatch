@@ -334,7 +334,7 @@ module Pages {
 
         dc.setColor(Theme.INK, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, (h(dc) * 0.30).toNumber(), Graphics.FONT_TINY,
-                    "FILiigaWatch 0.1.0", Graphics.TEXT_JUSTIFY_CENTER);
+                    "FILiigaWatch 0.2.0", Graphics.TEXT_JUSTIFY_CENTER);
         // Only ever says "(mock data)" in the dev-only mock scenarios —
         // real production installs never show anything here.
         if (!MockData.isLiveSource()) {

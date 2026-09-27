@@ -5,7 +5,7 @@ place, so there is never a question of which file is current.
 
 | File | What |
 |---|---|
-| `FILiigaWatch-v0.1.0.iq` | the store upload — 8 device targets from the 6 in `watch/manifest.xml` (compound devices expand automatically), not yet uploaded anywhere |
+| `FILiigaWatch-v0.2.0.iq` | the store upload — 8 device targets from the 6 in `watch/manifest.xml` (compound devices expand automatically) |
 | `hero-1440x720.png` | store banner |
 | `cover-500x500.png` | store tile |
 

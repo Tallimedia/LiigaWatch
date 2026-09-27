@@ -25,6 +25,17 @@
     <string id="Cadence60s">60 seconds</string>
 
     <!-- Status -->
-    <string id="Loading">Loading…</string>
+    <string id="Loading" scope="glance">Loading…</string>
     <string id="NoData">Service unavailable</string>
+
+    <!-- Glance -->
+    <string id="GlanceHeadline" scope="glance">SM-Liiga</string>
+    <string id="GlanceNoGamesToday" scope="glance">No games today</string>
+    <string id="GlanceGamesToday" scope="glance">$1$ games today</string>
+    <string id="GlanceGameToday" scope="glance">1 game today</string>
+    <string id="GlanceGamesTomorrow" scope="glance">$1$ games tomorrow</string>
+    <string id="GlanceGameTomorrow" scope="glance">1 game tomorrow</string>
+    <string id="GlanceGamesOn" scope="glance">$1$ games $2$</string>
+    <string id="GlanceGameOn" scope="glance">1 game $1$</string>
+    <string id="GlanceNextGame" scope="glance">Next game $1$</string>
 </strings>
