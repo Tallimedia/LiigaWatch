@@ -179,6 +179,12 @@ module Pages {
         var fav = AppMenu.favoriteTeam();
         var isFavorite = (fav != null) && (fav.equals(g[:home]) || fav.equals(g[:away]));
 
+        // A game that hasn't started has no score to show - "0 – 0" reads as
+        // a real result, not a placeholder, so it's misleading rather than
+        // just uninformative. Score appears once the game has started, and
+        // stays for the rest of that game day once it has (FINAL included).
+        var showScore = g[:started];
+
         // DEMO ONLY - logo preview for Nico, not for the shipped app (no
         // permission yet - LOGO-PERMISSION-REQUEST.md). Hardcoded to
         // whichever two teams happen to be playing today; revert before
@@ -187,7 +193,9 @@ module Pages {
         var awayLogo = demoLogo(g[:away]);
         if (homeLogo != null && awayLogo != null) {
             var rowY = top + statusH + withinGap;
-            var scoreText = Lang.format("$1$ – $2$", [g[:homeGoals], g[:awayGoals]]);
+            var scoreText = showScore
+                ? Lang.format("$1$ – $2$", [g[:homeGoals], g[:awayGoals]])
+                : "–";
             var scoreW = dc.getTextWidthInPixels(scoreText, Graphics.FONT_SMALL);
             var logoSize = 60;
             var gap = 10;
@@ -198,8 +206,10 @@ module Pages {
             return;
         }
 
-        var line = Lang.format("$1$ $2$ – $3$ $4$",
-            [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])]);
+        var line = showScore
+            ? Lang.format("$1$ $2$ – $3$ $4$",
+                [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])])
+            : Lang.format("$1$ – $2$", [Acronyms.of(g[:home]), Acronyms.of(g[:away])]);
         dc.setColor(isFavorite ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, top + statusH + withinGap, Graphics.FONT_SMALL, line,
                     Graphics.TEXT_JUSTIFY_CENTER);
