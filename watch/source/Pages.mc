@@ -185,27 +185,6 @@ module Pages {
         // stays for the rest of that game day once it has (FINAL included).
         var showScore = g[:started];
 
-        // DEMO ONLY - logo preview for Nico, not for the shipped app (no
-        // permission yet - LOGO-PERMISSION-REQUEST.md). Hardcoded to
-        // whichever two teams happen to be playing today; revert before
-        // committing anything.
-        var homeLogo = demoLogo(g[:home]);
-        var awayLogo = demoLogo(g[:away]);
-        if (homeLogo != null && awayLogo != null) {
-            var rowY = top + statusH + withinGap;
-            var scoreText = showScore
-                ? Lang.format("$1$ – $2$", [g[:homeGoals], g[:awayGoals]])
-                : "–";
-            var scoreW = dc.getTextWidthInPixels(scoreText, Graphics.FONT_SMALL);
-            var logoSize = 60;
-            var gap = 10;
-            dc.drawBitmap(cx - scoreW / 2 - gap - logoSize, rowY - logoSize / 2, homeLogo);
-            dc.setColor(isFavorite ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, rowY, Graphics.FONT_SMALL, scoreText, Graphics.TEXT_JUSTIFY_CENTER);
-            dc.drawBitmap(cx + scoreW / 2 + gap, rowY - logoSize / 2, awayLogo);
-            return;
-        }
-
         var line = showScore
             ? Lang.format("$1$ $2$ – $3$ $4$",
                 [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])])
@@ -213,13 +192,6 @@ module Pages {
         dc.setColor(isFavorite ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, top + statusH + withinGap, Graphics.FONT_SMALL, line,
                     Graphics.TEXT_JUSTIFY_CENTER);
-    }
-
-    //! DEMO ONLY - see drawGameRow.
-    function demoLogo(teamName as String) as WatchUi.BitmapResource? {
-        if (teamName.equals("Ilves")) { return WatchUi.loadResource(Rez.Drawables.DemoLogoIlves) as WatchUi.BitmapResource; }
-        if (teamName.equals("TPS")) { return WatchUi.loadResource(Rez.Drawables.DemoLogoTps) as WatchUi.BitmapResource; }
-        return null;
     }
 
     //! Seconds since period start -> "MM:SS". Only ever fed a value straight
@@ -370,7 +342,7 @@ module Pages {
 
         dc.setColor(Theme.INK, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, (h(dc) * 0.30).toNumber(), Graphics.FONT_TINY,
-                    "FILiigaWatch 0.2.0", Graphics.TEXT_JUSTIFY_CENTER);
+                    "FILiigaWatch 0.3.0", Graphics.TEXT_JUSTIFY_CENTER);
         // Only ever says "(mock data)" in the dev-only mock scenarios —
         // real production installs never show anything here.
         if (!MockData.isLiveSource()) {
