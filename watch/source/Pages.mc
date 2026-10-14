@@ -154,7 +154,7 @@ module Pages {
     //! value the real API returns (never a locally-ticked clock) — carried
     //! straight through from MockData, per RESEARCH.md §1.
     //!
-    //! The score line uses Theme.FAVORITE instead of INK when either side
+    //! The score line uses Theme.favorite() instead of INK when either side
     //! is the user's chosen team (AppMenu.favoriteTeam(), 2026-09-24
     //! addition) — one accent colour for "your team", not a per-team
     //! colour table, so this doesn't reopen the "no team colours" v1 call.
@@ -168,7 +168,7 @@ module Pages {
             status = "FINAL";
         } else if (g[:started]) {
             status = Lang.format("P$1$ — $2$", [g[:period], clock(g[:gameTime])]);
-            statusColor = Theme.LIVE;
+            statusColor = Theme.live();
         } else {
             status = g[:startTime];
         }
@@ -196,7 +196,7 @@ module Pages {
             ? Lang.format(isShootout ? "$1$ $2$ – $3$ $4$ (VL)" : "$1$ $2$ – $3$ $4$",
                 [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])])
             : Lang.format("$1$ – $2$", [Acronyms.of(g[:home]), Acronyms.of(g[:away])]);
-        dc.setColor(isFavorite ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(isFavorite ? Theme.favorite() : Theme.INK, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, top + statusH + withinGap, Graphics.FONT_SMALL, line,
                     Graphics.TEXT_JUSTIFY_CENTER);
     }
@@ -308,13 +308,13 @@ module Pages {
         return shown;
     }
 
-    //! One standings row. `highlight` is Theme.FAVORITE for the user's
+    //! One standings row. `highlight` is Theme.favorite() for the user's
     //! chosen team (a single accent for "your team", distinct from any
     //! per-team colour table — see the note on drawGameRow).
     function drawStandingsRow(dc as Graphics.Dc, r as Dictionary, leftX as Number,
                                rightX as Number, y as Number, rowH as Number,
                                highlight as Boolean) as Void {
-        dc.setColor(highlight ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(highlight ? Theme.favorite() : Theme.INK, Graphics.COLOR_TRANSPARENT);
         var label = Lang.format("$1$ $2$", [r[:rank], r[:name]]);
         dc.drawText(leftX, y, Graphics.FONT_XTINY, label, Graphics.TEXT_JUSTIFY_LEFT);
         var pts = Lang.format("$1$p", [r[:points]]);

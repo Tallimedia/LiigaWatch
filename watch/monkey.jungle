@@ -1,1 +1,16 @@
 project.manifest = manifest.xml
+
+# Theme.mc's live()/favorite() colour accents don't render on true 2-colour
+# displays (see Theme.mc for why). Every product gets the colour variant by
+# default; the monochrome Instinct line below gets the mono fallback
+# instead. Add a device here if a future product turns out to share the
+# same MIP/transflective 2-colour display.
+base.excludeAnnotations = monoTheme
+
+instinct2.excludeAnnotations = colorTheme
+instinct2s.excludeAnnotations = colorTheme
+instinct2x.excludeAnnotations = colorTheme
+instinct3solar45mm.excludeAnnotations = colorTheme
+instinctcrossover.excludeAnnotations = colorTheme
+instincte40mm.excludeAnnotations = colorTheme
+instincte45mm.excludeAnnotations = colorTheme
