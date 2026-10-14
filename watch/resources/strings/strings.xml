@@ -1,5 +1,5 @@
 <strings>
-    <string id="AppName">FILiigaWatch</string>
+    <string id="AppName">Liiga Watch</string>
 
     <!-- Today screen -->
     <string id="TodayHeaderGames">Games today $1$</string>
