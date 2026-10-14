@@ -185,8 +185,15 @@ module Pages {
         // stays for the rest of that game day once it has (FINAL included).
         var showScore = g[:started];
 
+        // Shootout marker, matching liiga.fi's own "(VL)" next to the score
+        // (Voittolaukaus - "winning shot"). finishedType only means anything
+        // once the game has ended; ignore it otherwise.
+        var finishedType = g[:finishedType];
+        var isShootout = g[:ended] && finishedType != null
+            && (finishedType as String).equals("ENDED_DURING_WINNING_SHOT_COMPETITION");
+
         var line = showScore
-            ? Lang.format("$1$ $2$ – $3$ $4$",
+            ? Lang.format(isShootout ? "$1$ $2$ – $3$ $4$ (VL)" : "$1$ $2$ – $3$ $4$",
                 [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])])
             : Lang.format("$1$ – $2$", [Acronyms.of(g[:home]), Acronyms.of(g[:away])]);
         dc.setColor(isFavorite ? Theme.FAVORITE : Theme.INK, Graphics.COLOR_TRANSPARENT);
