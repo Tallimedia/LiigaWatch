@@ -1,12 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FILiigaWatch — Liiga scores and standings on your wrist</title>
+<title>Liiga Watch — Liiga scores and standings on your wrist</title>
 <meta name="description" content="Live Liiga (SM-liiga) ice hockey scores and standings on a Garmin watch. Unofficial, not affiliated with Liiga.">
 <link rel="stylesheet" href="/public/styles.css">
 <style>
+  /* Dark mode, default — same mechanism and token values as weatherapp/
+     volvowatchapp.tallimedia.com: the dark palette lives in :root, and
+     `data-theme="light"` (set by the toggle button, remembered in
+     localStorage) is what opts out. Scoped here since styles.css is shared
+     and still undarkened. */
+  :root {
+    --color-bg: #16181a; --color-surface: #1e2022; --color-neutral-100: #232527;
+    --color-input-bg: #1e2022;
+    --color-divider: color-mix(in srgb, #fff 14%, transparent);
+    --color-text: #f0f0f1; --color-neutral-300: #3a3c3e; --color-neutral-400: #4a4c4e;
+    --color-neutral-500: #8b8b8e; --color-neutral-600: #a3a3a6;
+    --color-neutral-700: #c2c2c4; --color-neutral-800: #dcdcdd;
+    --color-accent-700: #94bce3; --color-accent-2: #94bce3;
+  }
+  :root[data-theme="light"] {
+    --color-bg: #f2f2f3; --color-surface: #e9e9ea; --color-neutral-100: #f5f5f8;
+    --color-input-bg: #fff;
+    --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+    --color-text: #1d1f20; --color-neutral-300: #d4d4d7; --color-neutral-400: #c2c2c5;
+    --color-neutral-500: #98989b; --color-neutral-600: #7a7a7d;
+    --color-neutral-700: #5d5d60; --color-neutral-800: #424244;
+    --color-accent-700: #416180; --color-accent-2: #5980a6;
+  }
+  .theme-btn { display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+               width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--color-neutral-300);
+               background: var(--color-input-bg); color: var(--color-neutral-700); cursor: pointer; padding: 0; }
+  .theme-btn svg { width: 16px; height: 16px; display: block; }
+  .theme-btn[aria-pressed="true"] { color: var(--color-accent-700); border-color: var(--color-accent-700); }
+  #lang { font: inherit; font-size: 14px; padding: 5px 8px; border-radius: 8px;
+          border: 1px solid var(--color-neutral-300); background: var(--color-input-bg); color: var(--color-text); }
+
   body { margin: 0; }
   a { color: var(--color-accent-700); }
   .wrap { max-width: 1000px; margin: 0 auto; padding: 0 32px; }
@@ -50,14 +81,22 @@
       <ellipse cx="32" cy="46" rx="20" ry="7" fill="var(--color-accent-900)"></ellipse>
       <path d="M18 22h28l-6 14H24z" stroke="var(--color-accent)" stroke-width="4" stroke-linejoin="round"></path>
     </svg>
-    <span>FILiigaWatch</span>
+    <span>Liiga Watch</span>
   </span>
   <div style="flex:1"></div>
-  <span style="display:flex;gap:22px;flex-wrap:wrap;align-items:center;
+  <span style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;
       font-family:var(--font-heading);font-weight:600;font-size:14px;
       text-transform:uppercase;letter-spacing:0.06em">
-    <a href="#live">Live</a>
-    <a href="#table">Table</a>
+    <a href="#live" id="nav-live">Today</a>
+    <a href="#table" id="nav-table">Table</a>
+    <button class="theme-btn" id="theme-toggle" type="button" aria-label="Light mode" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+      </svg>
+    </button>
+    <select id="lang" aria-label="Language">
+      <option value="fi">Suomi</option><option value="sv">Svenska</option><option value="en">English</option>
+    </select>
   </span>
 </nav>
 
@@ -65,14 +104,14 @@
   <div style="padding:56px 0 40px;border-bottom:1px solid var(--color-divider)">
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px">
       <span class="tag tag-accent">Connect IQ · Widget</span>
-      <span class="tag tag-outline">v0.1.0</span>
-      <span class="tag tag-neutral">Finland</span>
+      <span class="tag tag-outline">v1.1.0</span>
+      <span class="tag tag-neutral" id="tag-area">Finland</span>
     </div>
-    <h1 style="font-size:56px;line-height:0.98;letter-spacing:-0.02em;margin:0 0 18px;text-wrap:balance">
+    <h1 style="font-size:56px;line-height:0.98;letter-spacing:-0.02em;margin:0 0 18px;text-wrap:balance" id="hero">
       Liiga on your wrist.</h1>
-    <p style="font-size:18px;max-width:52ch;color:var(--color-neutral-800);margin:0 0 6px;text-wrap:pretty">
+    <p style="font-size:18px;max-width:52ch;color:var(--color-neutral-800);margin:0 0 6px;text-wrap:pretty" id="lede">
       Live scores and standings from liiga.fi, on a Garmin watch.</p>
-    <p class="disclaimer">Unofficial — not affiliated with Jääkiekon SM-liiga Oy.</p>
+    <p class="disclaimer" id="disclaimer-top">Unofficial — not affiliated with Jääkiekon SM-liiga Oy.</p>
   </div>
 </header>
 
@@ -81,22 +120,22 @@
   <section id="live" style="margin-bottom:8px">
     <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px">
       <span class="sec-num" style="font-family:var(--font-heading);font-size:13px;
-          letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">Today</span>
+          letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)" id="h-today">Today</span>
       <span class="sec-rule" style="flex:1;height:1px;background:var(--color-divider)"></span>
     </div>
     <div class="panel" id="games-panel">
-      <div class="loading">Loading…</div>
+      <div class="loading" id="loading-games">Loading…</div>
     </div>
   </section>
 
   <section id="table">
     <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px">
       <span class="sec-num" style="font-family:var(--font-heading);font-size:13px;
-          letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">Table</span>
+          letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)" id="h-table">Table</span>
       <span class="sec-rule" style="flex:1;height:1px;background:var(--color-divider)"></span>
     </div>
     <div class="panel" id="table-panel">
-      <div class="loading">Loading…</div>
+      <div class="loading" id="loading-table">Loading…</div>
     </div>
   </section>
 
@@ -106,60 +145,184 @@
   <div style="display:flex;gap:40px;font-size:14px;flex-wrap:wrap">
     <div style="display:grid;gap:6px">
       <span style="font-family:var(--font-heading);font-size:12px;letter-spacing:0.08em;
-          text-transform:uppercase;color:var(--color-neutral-600)">Legal</span>
-      <a href="/terms">Terms</a><a href="/privacy">Privacy</a>
+          text-transform:uppercase;color:var(--color-neutral-600)" id="h-legal">Legal</span>
+      <a href="/terms" id="foot-terms">Terms</a><a href="/privacy" id="foot-privacy">Privacy</a>
     </div>
     <div style="display:grid;gap:6px">
       <span style="font-family:var(--font-heading);font-size:12px;letter-spacing:0.08em;
-          text-transform:uppercase;color:var(--color-neutral-600)">Contact</span>
+          text-transform:uppercase;color:var(--color-neutral-600)" id="h-contact">Contact</span>
       <a href="mailto:iot@tallimedia.com">iot@tallimedia.com</a>
     </div>
   </div>
-  <p class="disclaimer" style="margin-top:20px">Source: Liiga.fi. Unofficial app, not affiliated
+  <p class="disclaimer" style="margin-top:20px" id="disclaimer-bottom">Source: Liiga.fi. Unofficial app, not affiliated
     with Jääkiekon SM-liiga Oy or its clubs.</p>
 </footer>
 
 <script>
 (function () {
+  /* Same mechanism as weatherapp/volvowatchapp.tallimedia.com: a flat STR
+     dictionary per language, T(key) looks up the current one with an English
+     fallback, applyStrings() pushes it into the DOM by element id. This page
+     is small enough to keep it all inline rather than splitting into a
+     shared common.js the way the weather site does. */
+  var STR = {
+    fi: {
+      navToday: 'Tänään', navTable: 'Sarjataulukko', tagArea: 'Suomi',
+      hero: 'Liiga ranteessasi.',
+      lede: 'Liigan tulokset ja sarjataulukko suoraan liiga.fi:stä, Garmin-kellossa.',
+      disclaimer: 'Epävirallinen — ei liity Jääkiekon SM-liiga Oy:hyn.',
+      hToday: 'Tänään', hTable: 'Sarjataulukko',
+      loading: 'Ladataan…',
+      noGames: 'Ei otteluita tänään. Seuraava: ', noGamesFallback: '—',
+      errGames: 'Otteluita ei voitu ladata.', errTable: 'Sarjataulukkoa ei voitu ladata.',
+      final: 'LOPPU',
+      hLegal: 'Tietosuoja', hContact: 'Yhteystiedot', terms: 'Käyttöehdot', privacy: 'Tietosuoja',
+      footDisclaimer: 'Lähde: Liiga.fi. Epävirallinen sovellus, ei liity Jääkiekon SM-liiga Oy:hyn tai sen seuroihin.'
+    },
+    sv: {
+      navToday: 'Idag', navTable: 'Tabell', tagArea: 'Finland',
+      hero: 'FM-ligan på handleden.',
+      lede: 'FM-ligans resultat och tabell direkt från liiga.fi, på en Garmin-klocka.',
+      disclaimer: 'Inofficiell — inte ansluten till Jääkiekon SM-liiga Oy.',
+      hToday: 'Idag', hTable: 'Tabell',
+      loading: 'Laddar…',
+      noGames: 'Inga matcher idag. Nästa: ', noGamesFallback: '—',
+      errGames: 'Kunde inte ladda matcher.', errTable: 'Kunde inte ladda tabellen.',
+      final: 'SLUT',
+      hLegal: 'Juridiskt', hContact: 'Kontakt', terms: 'Villkor', privacy: 'Integritet',
+      footDisclaimer: 'Källa: Liiga.fi. Inofficiell app, inte ansluten till Jääkiekon SM-liiga Oy eller dess klubbar.'
+    },
+    en: {
+      navToday: 'Today', navTable: 'Table', tagArea: 'Finland',
+      hero: 'Liiga on your wrist.',
+      lede: 'Live scores and standings from liiga.fi, on a Garmin watch.',
+      disclaimer: 'Unofficial — not affiliated with Jääkiekon SM-liiga Oy.',
+      hToday: 'Today', hTable: 'Table',
+      loading: 'Loading…',
+      noGames: 'No games today. Next: ', noGamesFallback: '—',
+      errGames: 'Could not load games.', errTable: 'Could not load standings.',
+      final: 'FINAL',
+      hLegal: 'Legal', hContact: 'Contact', terms: 'Terms', privacy: 'Privacy',
+      footDisclaimer: 'Source: Liiga.fi. Unofficial app, not affiliated with Jääkiekon SM-liiga Oy or its clubs.'
+    }
+  };
+
+  function storedLang() {
+    try { return localStorage.getItem('lw-lang'); } catch (_) { return null; }
+  }
+  var LANG = storedLang() || 'fi';
+  function T(k) { return (STR[LANG] && STR[LANG][k]) || STR.en[k]; }
+
+  function set(id, k) {
+    var e = document.getElementById(id);
+    if (e) { e.textContent = T(k); }
+  }
+
+  function applyStrings() {
+    document.documentElement.lang = LANG;
+    set('nav-live', 'navToday'); set('nav-table', 'navTable');
+    set('tag-area', 'tagArea');
+    set('hero', 'hero'); set('lede', 'lede');
+    set('disclaimer-top', 'disclaimer');
+    set('h-today', 'hToday'); set('h-table', 'hTable');
+    set('loading-games', 'loading'); set('loading-table', 'loading');
+    set('h-legal', 'hLegal'); set('h-contact', 'hContact');
+    set('foot-terms', 'terms'); set('foot-privacy', 'privacy');
+    set('disclaimer-bottom', 'footDisclaimer');
+  }
+
   function statusText(g) {
-    if (g.ended) return 'FINAL';
-    if (g.started) return 'P' + g.period + ' — ' + Math.floor(g.gameTime / 60) + ':'
-      + String(g.gameTime % 60).padStart(2, '0');
+    if (g.ended) { return T('final'); }
+    if (g.started) {
+      return 'P' + g.period + ' — ' + Math.floor(g.gameTime / 60) + ':'
+        + String(g.gameTime % 60).padStart(2, '0');
+    }
     return new Date(g.start).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' });
   }
 
-  fetch('/v1/games').then(function (r) { return r.json(); }).then(function (data) {
-    var el = document.getElementById('games-panel');
-    if (!data.games.length) {
-      el.innerHTML = '<div class="empty">No games today. Next: ' + (data.nextGameDate || '—') + '</div>';
-      return;
-    }
-    el.innerHTML = data.games.map(function (g) {
-      var live = g.started && !g.ended;
-      return '<div class="game-row">'
-        + '<div class="game-status' + (live ? ' live' : '') + '">' + statusText(g) + '</div>'
-        + '<div class="game-score">' + g.home.acronym + ' ' + g.home.goals
-        + ' – ' + g.away.goals + ' ' + g.away.acronym + '</div>'
-        + '</div>';
-    }).join('');
-  }).catch(function () {
-    document.getElementById('games-panel').innerHTML = '<div class="empty">Could not load games.</div>';
-  });
+  function loadGames() {
+    fetch('/v1/games').then(function (r) { return r.json(); }).then(function (data) {
+      var el = document.getElementById('games-panel');
+      if (!data.games.length) {
+        el.innerHTML = '<div class="empty">' + T('noGames')
+          + (data.nextGameDate || T('noGamesFallback')) + '</div>';
+        return;
+      }
+      el.innerHTML = data.games.map(function (g) {
+        var live = g.started && !g.ended;
+        var vl = g.ended && g.finishedType === 'ENDED_DURING_WINNING_SHOT_COMPETITION';
+        var score = g.started
+          ? (g.home.acronym + ' ' + g.home.goals + ' – ' + g.away.goals + ' ' + g.away.acronym
+             + (vl ? ' (VL)' : ''))
+          : (g.home.acronym + ' – ' + g.away.acronym);
+        return '<div class="game-row">'
+          + '<div class="game-status' + (live ? ' live' : '') + '">' + statusText(g) + '</div>'
+          + '<div class="game-score">' + score + '</div>'
+          + '</div>';
+      }).join('');
+    }).catch(function () {
+      document.getElementById('games-panel').innerHTML = '<div class="empty">' + T('errGames') + '</div>';
+    });
+  }
 
-  fetch('/v1/standings').then(function (r) { return r.json(); }).then(function (data) {
-    var el = document.getElementById('table-panel');
-    var lines = data.playoffsLines || [];
-    el.innerHTML = data.standings.map(function (r) {
-      var cls = 'table-row' + (lines.indexOf(r.rank) !== -1 ? ' playoff-line' : '');
-      return '<div class="' + cls + '">'
-        + '<div class="table-rank">' + r.rank + '</div>'
-        + '<div class="table-name">' + r.name + '</div>'
-        + '<div class="table-points">' + r.points + 'p</div>'
-        + '</div>';
-    }).join('');
-  }).catch(function () {
-    document.getElementById('table-panel').innerHTML = '<div class="empty">Could not load standings.</div>';
-  });
+  function loadStandings() {
+    fetch('/v1/standings').then(function (r) { return r.json(); }).then(function (data) {
+      var el = document.getElementById('table-panel');
+      var lines = data.playoffsLines || [];
+      el.innerHTML = data.standings.map(function (r) {
+        var cls = 'table-row' + (lines.indexOf(r.rank) !== -1 ? ' playoff-line' : '');
+        return '<div class="' + cls + '">'
+          + '<div class="table-rank">' + r.rank + '</div>'
+          + '<div class="table-name">' + r.name + '</div>'
+          + '<div class="table-points">' + r.points + 'p</div>'
+          + '</div>';
+      }).join('');
+    }).catch(function () {
+      document.getElementById('table-panel').innerHTML = '<div class="empty">' + T('errTable') + '</div>';
+    });
+  }
+
+  /* Dark is the default look (matching weatherapp/volvowatchapp); the toggle
+     is purely an opt-OUT into light, remembered in localStorage. */
+  function initTheme() {
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) { return; }
+    var stored = null;
+    try { stored = localStorage.getItem('lw-theme'); } catch (_) {}
+    function apply(light) {
+      if (light) { document.documentElement.setAttribute('data-theme', 'light'); }
+      else { document.documentElement.removeAttribute('data-theme'); }
+      btn.setAttribute('aria-pressed', String(!!light));
+    }
+    apply(stored === 'light');
+    btn.addEventListener('click', function () {
+      var light = document.documentElement.getAttribute('data-theme') !== 'light';
+      try {
+        if (light) { localStorage.setItem('lw-theme', 'light'); }
+        else { localStorage.removeItem('lw-theme'); }
+      } catch (_) {}
+      apply(light);
+    });
+  }
+
+  function initLang() {
+    var sel = document.getElementById('lang');
+    if (!sel) { return; }
+    sel.value = LANG;
+    sel.addEventListener('change', function (e) {
+      LANG = e.target.value;
+      try { localStorage.setItem('lw-lang', LANG); } catch (_) {}
+      applyStrings();
+      loadGames();
+      loadStandings();
+    });
+  }
+
+  initTheme();
+  initLang();
+  applyStrings();
+  loadGames();
+  loadStandings();
 })();
 </script>
 
