@@ -144,7 +144,7 @@ def make_hero() -> None:
     d = ImageDraw.Draw(img)
     x, max_w = 96, 660
 
-    title = "FILiigaWatch"
+    title = "Liiga Watch"
     size = 74
     while size > 34 and d.textlength(title, font=font(size, "bold")) > max_w:
         size -= 2
@@ -183,7 +183,7 @@ def make_cover() -> None:
     img.paste(watch, (S // 2 - watch.size[0] // 2, 228 - watch.size[1] // 2), watch)
 
     d = ImageDraw.Draw(img)
-    centered(d, S // 2, 462, "FILiigaWatch", font(30, "bold"), WHITE)
+    centered(d, S // 2, 462, "Liiga Watch", font(30, "bold"), WHITE)
 
     img.save(COVER, "PNG")
     print(f"{COVER.name}  {img.size[0]}x{img.size[1]}  {COVER.stat().st_size:,} bytes")
