@@ -61,6 +61,13 @@
   .table-points { font-family: var(--font-heading); font-variant-numeric: tabular-nums; }
   .loading, .empty { color: var(--color-neutral-600); font-size: 14px; padding: 8px 0; }
   .disclaimer { font-size: 13px; color: var(--color-neutral-600); margin-top: 8px; }
+  .device-shot { width: 100%; max-width: 280px; display: block; margin: 0 auto; }
+  .shot-disc { aspect-ratio: 1; border-radius: 50%; overflow: hidden;
+               border: 1px solid var(--color-divider); background: var(--color-neutral-100); }
+  .shot-disc img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot-cap { font-family: var(--font-heading); text-transform: uppercase;
+              letter-spacing: 0.08em; font-size: 11px; margin-top: 8px;
+              color: var(--color-accent-700); text-align: center; }
 </style>
 </head>
 <body>
@@ -87,6 +94,7 @@
   <span style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;
       font-family:var(--font-heading);font-weight:600;font-size:14px;
       text-transform:uppercase;letter-spacing:0.06em">
+    <a href="#screens" id="nav-screens">Screens</a>
     <a href="#live" id="nav-live">Today</a>
     <a href="#table" id="nav-table">Table</a>
     <button class="theme-btn" id="theme-toggle" type="button" aria-label="Light mode" aria-pressed="false">
@@ -116,6 +124,27 @@
 </header>
 
 <main class="wrap" style="padding:40px 0 64px">
+
+  <section id="screens" style="margin-bottom:48px">
+    <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:24px">
+      <span class="sec-num" style="font-family:var(--font-heading);font-size:13px;
+          letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)" id="h-screens">Screens</span>
+      <span class="sec-rule" style="flex:1;height:1px;background:var(--color-divider)"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,0.85fr) minmax(0,1.15fr);gap:40px;align-items:center">
+      <img class="device-shot" src="/public/shots/pg1.png" alt="Liiga Watch on a Garmin fenix, showing today's games">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:20px">
+        <figure style="margin:0"><div class="shot-disc"><img src="/public/shots/raw-pg1-2.png" alt="Today, scrolled"></div>
+          <figcaption class="shot-cap" id="cap-pg1-2">Today</figcaption></figure>
+        <figure style="margin:0"><div class="shot-disc"><img src="/public/shots/raw-pg1-3.png" alt="Today, scrolled further"></div>
+          <figcaption class="shot-cap" id="cap-pg1-3">Today</figcaption></figure>
+        <figure style="margin:0"><div class="shot-disc"><img src="/public/shots/raw-pg2-1.png" alt="League table"></div>
+          <figcaption class="shot-cap" id="cap-pg2-1">Table</figcaption></figure>
+        <figure style="margin:0"><div class="shot-disc"><img src="/public/shots/raw-pg2-2.png" alt="League table, favourite team pinned"></div>
+          <figcaption class="shot-cap" id="cap-pg2-2">Table</figcaption></figure>
+      </div>
+    </div>
+  </section>
 
   <section id="live" style="margin-bottom:8px">
     <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px">
@@ -167,10 +196,11 @@
      shared common.js the way the weather site does. */
   var STR = {
     fi: {
-      navToday: 'Tänään', navTable: 'Sarjataulukko', tagArea: 'Suomi',
+      navScreens: 'Kuvakaappaukset', navToday: 'Tänään', navTable: 'Sarjataulukko', tagArea: 'Suomi',
       hero: 'Liiga ranteessasi.',
       lede: 'Liigan tulokset ja sarjataulukko suoraan liiga.fi:stä, Garmin-kellossa.',
       disclaimer: 'Epävirallinen — ei liity Jääkiekon SM-liiga Oy:hyn.',
+      hScreens: 'Kuvakaappaukset', capToday: 'Tänään', capTable: 'Sarjataulukko',
       hToday: 'Tänään', hTable: 'Sarjataulukko',
       loading: 'Ladataan…',
       noGames: 'Ei otteluita tänään. Seuraava: ', noGamesFallback: '—',
@@ -180,10 +210,11 @@
       footDisclaimer: 'Lähde: Liiga.fi. Epävirallinen sovellus, ei liity Jääkiekon SM-liiga Oy:hyn tai sen seuroihin.'
     },
     sv: {
-      navToday: 'Idag', navTable: 'Tabell', tagArea: 'Finland',
+      navScreens: 'Skärmbilder', navToday: 'Idag', navTable: 'Tabell', tagArea: 'Finland',
       hero: 'FM-ligan på handleden.',
       lede: 'FM-ligans resultat och tabell direkt från liiga.fi, på en Garmin-klocka.',
       disclaimer: 'Inofficiell — inte ansluten till Jääkiekon SM-liiga Oy.',
+      hScreens: 'Skärmbilder', capToday: 'Idag', capTable: 'Tabell',
       hToday: 'Idag', hTable: 'Tabell',
       loading: 'Laddar…',
       noGames: 'Inga matcher idag. Nästa: ', noGamesFallback: '—',
@@ -193,10 +224,11 @@
       footDisclaimer: 'Källa: Liiga.fi. Inofficiell app, inte ansluten till Jääkiekon SM-liiga Oy eller dess klubbar.'
     },
     en: {
-      navToday: 'Today', navTable: 'Table', tagArea: 'Finland',
+      navScreens: 'Screens', navToday: 'Today', navTable: 'Table', tagArea: 'Finland',
       hero: 'Liiga on your wrist.',
       lede: 'Live scores and standings from liiga.fi, on a Garmin watch.',
       disclaimer: 'Unofficial — not affiliated with Jääkiekon SM-liiga Oy.',
+      hScreens: 'Screens', capToday: 'Today', capTable: 'Table',
       hToday: 'Today', hTable: 'Table',
       loading: 'Loading…',
       noGames: 'No games today. Next: ', noGamesFallback: '—',
@@ -220,10 +252,13 @@
 
   function applyStrings() {
     document.documentElement.lang = LANG;
-    set('nav-live', 'navToday'); set('nav-table', 'navTable');
+    set('nav-screens', 'navScreens'); set('nav-live', 'navToday'); set('nav-table', 'navTable');
     set('tag-area', 'tagArea');
     set('hero', 'hero'); set('lede', 'lede');
     set('disclaimer-top', 'disclaimer');
+    set('h-screens', 'hScreens');
+    set('cap-pg1-2', 'capToday'); set('cap-pg1-3', 'capToday');
+    set('cap-pg2-1', 'capTable'); set('cap-pg2-2', 'capTable');
     set('h-today', 'hToday'); set('h-table', 'hTable');
     set('loading-games', 'loading'); set('loading-table', 'loading');
     set('h-legal', 'hLegal'); set('h-contact', 'hContact');
