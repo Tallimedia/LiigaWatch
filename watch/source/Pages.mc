@@ -1,5 +1,7 @@
 import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.Math;
+import Toybox.System;
 import Toybox.Time;
 import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
@@ -17,19 +19,37 @@ module Pages {
     function w(dc as Graphics.Dc) as Number { return dc.getWidth(); }
     function h(dc as Graphics.Dc) as Number { return dc.getHeight(); }
 
+    //! True if `text` at `font`, centred at (cx, y), actually fits the
+    //! screen's visible area — found 2026-10-15 via a real screenshot (the
+    //! "(VL)" shootout suffix clipped on a lower game row): a flat
+    //! percentage of screen *width* (what drawFittingHeader used to check)
+    //! is the wrong test on a round display, because the visible width
+    //! shrinks the further a row sits from vertical centre. A row near the
+    //! top or bottom can clip even when the text is well inside 92% of the
+    //! raw screen width, which is exactly what happened here. Computes the
+    //! real chord width at that y on round screens; falls back to a flat
+    //! width check on rectangular/semi-round ones, where that's correct.
+    function fitsScreen(dc as Graphics.Dc, text as String, font, y as Number) as Boolean {
+        var textW = dc.getTextWidthInPixels(text, font);
+        if (System.getDeviceSettings().screenShape != System.SCREEN_SHAPE_ROUND) {
+            return textW <= w(dc) * 0.92;
+        }
+        var r = w(dc) / 2.0;
+        var dy = (y - h(dc) / 2.0).abs();
+        if (dy >= r) { return false; }
+        var halfChord = Math.sqrt(r * r - dy * dy);
+        return textW <= halfChord * 2 * 0.92;
+    }
+
     //! Draws `full` centred at (cx, y), or `compact` instead if `full`
-    //! measures wider than the screen actually has — found 2026-09-24 on
-    //! Instinct 2 (176x176px vs. fenix847mm's 454x454): Garmin's system
-    //! fonts are roughly the same absolute pixel size on every device, so
-    //! a scrolled-range header ("Games today 24.9. 3-3") that fits fine at
-    //! 454px genuinely doesn't fit at 176px. No percentage-of-screen
-    //! margin can fix that — only measuring the real text width can, via
-    //! getTextWidthInPixels, which is the whole reason this exists rather
-    //! than more margin tuning.
+    //! doesn't actually fit there — found 2026-09-24 on Instinct 2
+    //! (176x176px vs. fenix847mm's 454x454): Garmin's system fonts are
+    //! roughly the same absolute pixel size on every device, so a
+    //! scrolled-range header ("Games today 24.9. 3-3") that fits fine at
+    //! 454px genuinely doesn't fit at 176px.
     function drawFittingHeader(dc as Graphics.Dc, cx as Number, y as Number,
                                 full as String, compact as String) as Void {
-        var text = (dc.getTextWidthInPixels(full, Graphics.FONT_XTINY) > w(dc) * 0.92)
-            ? compact : full;
+        var text = fitsScreen(dc, full, Graphics.FONT_XTINY, y) ? full : compact;
         dc.drawText(cx, y, Graphics.FONT_XTINY, text, Graphics.TEXT_JUSTIFY_CENTER);
     }
 
@@ -192,13 +212,25 @@ module Pages {
         var isShootout = g[:ended] && finishedType != null
             && (finishedType as String).equals("ENDED_DURING_WINNING_SHOT_COMPETITION");
 
-        var line = showScore
-            ? Lang.format(isShootout ? "$1$ $2$ – $3$ $4$ (VL)" : "$1$ $2$ – $3$ $4$",
-                [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])])
-            : Lang.format("$1$ – $2$", [Acronyms.of(g[:home]), Acronyms.of(g[:away])]);
+        var scoreY = top + statusH + withinGap;
+        var line;
+        if (showScore) {
+            var baseLine = Lang.format("$1$ $2$ – $3$ $4$",
+                [Acronyms.of(g[:home]), g[:homeGoals], g[:awayGoals], Acronyms.of(g[:away])]);
+            if (isShootout) {
+                var withVL = baseLine + " (VL)";
+                // Drop the suffix rather than clip it - a game lower on the
+                // screen has less room (see fitsScreen), and "(VL)" is a
+                // nice-to-have detail, not the score itself.
+                line = fitsScreen(dc, withVL, Graphics.FONT_SMALL, scoreY) ? withVL : baseLine;
+            } else {
+                line = baseLine;
+            }
+        } else {
+            line = Lang.format("$1$ – $2$", [Acronyms.of(g[:home]), Acronyms.of(g[:away])]);
+        }
         dc.setColor(isFavorite ? Theme.favorite() : Theme.INK, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, top + statusH + withinGap, Graphics.FONT_SMALL, line,
-                    Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, scoreY, Graphics.FONT_SMALL, line, Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     //! Seconds since period start -> "MM:SS". Only ever fed a value straight
