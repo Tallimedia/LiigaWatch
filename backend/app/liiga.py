@@ -146,13 +146,21 @@ async def games(day: str) -> dict[str, Any]:
 
 
 def _thin_standing(row: dict[str, Any]) -> dict[str, Any]:
+    # The settled fields (ranking/games/points/goals), not the live* ones -
+    # live* includes provisional results from games still in progress, which
+    # inflated the table mid-game (HIFK showed 17pts on the watch while the
+    # real/settled standings said 14 - caught by Nico 2026-10-20, confirmed
+    # directly against the live API: points=14, livePoints=17 for the same
+    # row at the same moment). The Today screen is the right place for
+    # live/in-progress state; the table should only ever show official,
+    # settled standings.
     return {
-        "rank": row["liveRanking"],
+        "rank": row["ranking"],
         "name": row["teamName"],
         "acronym": acronym(row["teamName"]),
-        "games": row["liveGames"],
-        "points": row["livePoints"],
-        "goalDiff": row["liveGoals"] - row["liveGoalsAgainst"],
+        "games": row["games"],
+        "points": row["points"],
+        "goalDiff": row["goals"] - row["goalsAgainst"],
     }
 
 
@@ -169,7 +177,7 @@ async def standings(season: int | None = None) -> dict[str, Any]:
     except (httpx.HTTPError, ValueError) as exc:
         raise LiigaError(f"standings fetch failed: {exc}") from exc
 
-    rows = sorted(data.get("season", []), key=lambda r: r["liveRanking"])
+    rows = sorted(data.get("season", []), key=lambda r: r["ranking"])
     return {
         "season": season,
         "standings": [_thin_standing(r) for r in rows],

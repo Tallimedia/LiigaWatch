@@ -1,18 +1,24 @@
 # Releases
 
 **Everything shippable lives here.** Not the Desktop, not a temp folder — one
-place, so there is never a question of which file is current.
+place, so there is never a question of which file is current. Follows the
+house `dist/` convention (`CLAUDE.md` → "Release artifacts"): `dist/` holds
+only the current version, `dist/archive/` holds every superseded one. No
+`build-release.sh` yet for this project — built manually with `monkeyc`
+(`-e` across the full `watch/manifest.xml` device list), moved here by hand
+until that script exists.
 
 | File | What |
 |---|---|
-| `FILiigaWatch-v0.3.0.iq` | the store upload — 8 device targets from the 6 in `watch/manifest.xml` (compound devices expand automatically) |
+| `LiigaWatch-v1.2.0.iq` | the store upload — 132 built targets from the 89 products in `watch/manifest.xml` (compound devices expand automatically) |
 | `hero-1440x720.png` | store banner |
 | `cover-500x500.png` | store tile |
 
-Device list is deliberately a small spread for layout sanity-checking
-(RESEARCH.md §6), not the final device manifest — expanding it is separate,
-later work. `instinct2` is excluded (RESEARCH.md Open Question 8: a real,
-diagnosed but unfixed rendering bug on its 2-colour palette).
+Full device list since v1.0.0 (RESEARCH.md §14) — including the monochrome
+Instinct line, fixed via a build-time `monkey.jungle` theme switch
+(`watch/source/Theme.mc`). The old "small spread for layout sanity-checking"
+note and the 8-device table above described the pre-launch beta only; this
+is the production manifest.
 
 No per-device settings here, unlike FIWeatherWatch — the app has no
 compiled-in defaults to edit per tester (favourite team and cadence are both

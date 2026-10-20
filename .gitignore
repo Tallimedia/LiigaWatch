@@ -12,6 +12,15 @@ watch/bin/
 *.prg.debug.xml
 *.iq
 
+# dist/ is the tracked release-artifact folder (see claude-docs root
+# CLAUDE.md "Release artifacts" convention) — holds exactly the current
+# version(s), plus dist/archive/ for superseded ones. This repo has no
+# build-release.sh yet (built manually), so there's no DevConfig-style
+# safety gate — never copy a personalized/hand-sideloaded build in here,
+# same rule as VolvoWatch's (see feedback_no_personalized_beta_commits.md).
+!dist/
+!dist/**
+
 # Python (backend)
 __pycache__/
 *.py[cod]
