@@ -97,6 +97,12 @@
     <a href="#screens" id="nav-screens">Screens</a>
     <a href="#live" id="nav-live">Today</a>
     <a href="#table" id="nav-table">Table</a>
+    <a class="btn btn-primary blueprint"
+       href="https://apps.garmin.com/en-US/apps/2c581f70-1211-4a8a-a873-e6ff968f234b"
+       style="color: var(--color-bg); text-transform: uppercase; letter-spacing: 0.06em">
+      <span id="nav-install">Get it on Connect IQ</span>
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    </a>
     <button class="theme-btn" id="theme-toggle" type="button" aria-label="Light mode" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
@@ -112,13 +118,21 @@
   <div style="padding:56px 0 40px;border-bottom:1px solid var(--color-divider)">
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px">
       <span class="tag tag-accent">Connect IQ · Widget</span>
-      <span class="tag tag-outline">v1.1.0</span>
+      <span class="tag tag-outline">v1.2.0</span>
       <span class="tag tag-neutral" id="tag-area">Finland</span>
     </div>
     <h1 style="font-size:56px;line-height:0.98;letter-spacing:-0.02em;margin:0 0 18px;text-wrap:balance" id="hero">
       Liiga on your wrist.</h1>
     <p style="font-size:18px;max-width:52ch;color:var(--color-neutral-800);margin:0 0 6px;text-wrap:pretty" id="lede">
       Live scores and standings from liiga.fi, on a Garmin watch.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 6px">
+      <a class="btn btn-primary blueprint"
+         href="https://apps.garmin.com/en-US/apps/2c581f70-1211-4a8a-a873-e6ff968f234b"
+         style="color: var(--color-bg); font-size: 15px; padding: 13px 22px; text-transform: uppercase; letter-spacing: 0.06em">
+        <span id="cta-install">Install from Connect IQ</span>
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      </a>
+    </div>
     <p class="disclaimer" id="disclaimer-top">Unofficial — not affiliated with Jääkiekon SM-liiga Oy.</p>
   </div>
 </header>
@@ -197,6 +211,7 @@
   var STR = {
     fi: {
       navScreens: 'Kuvakaappaukset', navToday: 'Tänään', navTable: 'Sarjataulukko', tagArea: 'Suomi',
+      navInstall: 'Hanki Connect IQ:sta', ctaInstall: 'Asenna Connect IQ:sta',
       hero: 'Liiga ranteessasi.',
       lede: 'Liigan tulokset ja sarjataulukko suoraan liiga.fi:stä, Garmin-kellossa.',
       disclaimer: 'Epävirallinen — ei liity Jääkiekon SM-liiga Oy:hyn.',
@@ -211,6 +226,7 @@
     },
     sv: {
       navScreens: 'Skärmbilder', navToday: 'Idag', navTable: 'Tabell', tagArea: 'Finland',
+      navInstall: 'Hämta på Connect IQ', ctaInstall: 'Installera från Connect IQ',
       hero: 'FM-ligan på handleden.',
       lede: 'FM-ligans resultat och tabell direkt från liiga.fi, på en Garmin-klocka.',
       disclaimer: 'Inofficiell — inte ansluten till Jääkiekon SM-liiga Oy.',
@@ -225,6 +241,7 @@
     },
     en: {
       navScreens: 'Screens', navToday: 'Today', navTable: 'Table', tagArea: 'Finland',
+      navInstall: 'Get it on Connect IQ', ctaInstall: 'Install from Connect IQ',
       hero: 'Liiga on your wrist.',
       lede: 'Live scores and standings from liiga.fi, on a Garmin watch.',
       disclaimer: 'Unofficial — not affiliated with Jääkiekon SM-liiga Oy.',
@@ -253,6 +270,7 @@
   function applyStrings() {
     document.documentElement.lang = LANG;
     set('nav-screens', 'navScreens'); set('nav-live', 'navToday'); set('nav-table', 'navTable');
+    set('nav-install', 'navInstall'); set('cta-install', 'ctaInstall');
     set('tag-area', 'tagArea');
     set('hero', 'hero'); set('lede', 'lede');
     set('disclaimer-top', 'disclaimer');
