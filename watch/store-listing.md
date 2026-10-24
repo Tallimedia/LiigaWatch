@@ -1,5 +1,12 @@
 # Connect IQ Store listing copy — v1.0.0 / v1.1.0 / v1.2.0
 
+**Live on the Connect IQ Store since 2026-10-24** (v1.2.0 passed review — confirmed by
+the public listing URL resolving, 200). Public listing:
+<https://apps.garmin.com/en-US/apps/2c581f70-1211-4a8a-a873-e6ff968f234b>. That URL is
+now wired into `liigawatch.tallimedia.com`'s nav/hero install buttons and
+`www.tallimedia.com`'s Liiga Watch card + footer link — found already deployed live but
+uncommitted (2026-10-24), not something this doc's author did; preserved, not discarded.
+
 Paste-ready text for <https://apps-developer.garmin.com>. v1.0.0 (device list, the
 monochrome Instinct fix, "Liiga Watch" branding) was uploaded for review 2026-10-14,
 before the round-screen text-clipping fix (`fitsScreen()`) existed. v1.1.0 ships that
@@ -8,10 +15,9 @@ reading liiga.fi's `live*` fields (provisional, moving mid-game) instead of the 
 ones, so a team's points could read higher than the official standings while any game
 was in progress (HIFK showed 17pts mid-round, 14 was correct) — backend-only fix
 (`backend/app/liiga.py`), no watch-side change, bumped purely so the fixed backend ships
-under a version Garmin has actually reviewed. There's no separate "what's new" text
-below for 1.1.0 or 1.2.0 — none of v1.0.0/1.1.0/1.2.0 has been publicly visible yet
-(still pending Garmin's review as of 1.2.0), so the listing just describes what's
-actually shipping as the first public release, whichever version that ends up being.
+under a version Garmin has actually reviewed. **v1.2.0 is what actually went public** —
+there's no separate "what's new" text below for 1.1.0/1.2.0 since nothing before it was
+ever publicly visible, so the listing just describes what's actually shipping.
 
 The beta branch (`kavaleff/FILiigaWatch`'s `beta`, app id
 `3be2f502eeff40c7b0e859bfbb271279`) is unlisted and needs no copy — same split as
