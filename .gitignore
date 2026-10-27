@@ -21,6 +21,17 @@ watch/bin/
 !dist/
 !dist/**
 
+# EXCEPT the app binary itself — this repo's remote is public, and a public
+# repo handing out the installable app bypasses the Connect IQ Store
+# entirely. Untracked 2026-10-27 (public-repo audit); full copies preserved
+# locally and in the private kavaleff/FILiigaWatch repo.
+dist/*.iq
+dist/*.prg
+dist/*-settings.json
+dist/archive/*.iq
+dist/archive/*.prg
+dist/archive/*-settings.json
+
 # Python (backend)
 __pycache__/
 *.py[cod]
